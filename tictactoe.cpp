@@ -44,14 +44,6 @@ char checkWinner(const std::vector<char>& b) {
     return ' ';
 }
 
-bool boardFull(const std::vector<char>& b) {
-    for (int i = 0; i < 9; ++i) {
-        if (b[i] == ' ') {
-            return false;
-        }
-    }
-    return true;
-}
 
 int readMove(const std::vector<char>& board, char player) {
     while (true) {
@@ -74,6 +66,14 @@ int readMove(const std::vector<char>& board, char player) {
         }
         return index;
     }
+}
+bool boardFull(const std::vector<char>& b) {
+    for (int i = 0; i < 9; ++i) {
+        if (b[i] == ' ') {
+            return false;
+        }
+    }
+    return true;
 }
 
 int main() {
