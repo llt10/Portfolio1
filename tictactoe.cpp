@@ -19,24 +19,24 @@ char showCell(const std::vector<char>& board, int i) {
 
 void displayTable(const std::vector<char>& board) {
     std::cout << "\n";
-    std::cout << " " << showCell(board, 1) << " | " << showCell(board, 2) << " | " << showCell(board, 3) << "\n";
+    std::cout << " " << showCell(board, 0) << " | " << showCell(board, 1) << " | " << showCell(board, 2) << "\n";
     std::cout << "---+---+---\n";
-    std::cout << " " << showCell(board, 4) << " | " << showCell(board, 5) << " | " << showCell(board, 6) << "\n";
+    std::cout << " " << showCell(board, 3) << " | " << showCell(board, 4) << " | " << showCell(board, 5) << "\n";
     std::cout << "---+---+---\n";
-    std::cout << " " << showCell(board, 7) << " | " << showCell(board, 8) << " | " << showCell(board, 9) << "\n";
+    std::cout << " " << showCell(board, 6) << " | " << showCell(board, 7) << " | " << showCell(board, 8) << "\n";
     std::cout << "\n";
 }
 
 char checkWinner(const std::vector<char>& b) {
     const int lines[8][3] = {
-        {1,2,3},{4,5,6},{7,8,9},
-        {1,4,7},{2,5,8},{3,6,9},
-        {1,5,9},{3,5,7}
+        {0,1,2},{3,4,5},{6,7,8},
+        {0,3,6},{1,4,7},{2,5,8},
+        {0,4,8},{2,4,6}
     };
-    for (int i = 1; i < 9; i++) {
-        int a = lines[i][1];
-        int c = lines[i][2];
-        int d = lines[i][3];
+    for (int i = 0; i < 8; ++i) {
+        int a = lines[i][0];
+        int c = lines[i][1];
+        int d = lines[i][2];
         if (b[a] != ' ' && b[a] == b[c] && b[c] == b[d]) {
             return b[a];
         }
@@ -44,7 +44,7 @@ char checkWinner(const std::vector<char>& b) {
     return ' ';
 }
 
-bool filledBoard(const std::vector<char>& b) {
+bool boardFull(const std::vector<char>& b) {
     for (int i = 0; i < 9; ++i) {
         if (b[i] == ' ') {
             return false;
@@ -60,16 +60,16 @@ int readMove(const std::vector<char>& board, char player) {
         if (!(std::cin >> choice)) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            std::cout << "Please enter a number from 1 to 9.\n";
+            std::cout << "Please enter a number from 1 to 9.\n" << std::endl;
             continue;
         }
         if (choice < 1 || choice > 9) {
-            std::cout << "Out of bounds. Choose 1-9.\n";
+            std::cout << "Out of bounds. Choose 1-9.\n" << std::endl;
             continue;
         }
-        int indec = choice - 1;
+        int index = choice - 1;
         if (board[index] != ' ') {
-            std::cout << "That cell is already taken. Choose another.\n";
+            std::cout << "That cell is already taken. Choose another.\n" << std::endl;
             continue;
         }
         return index;
@@ -77,8 +77,8 @@ int readMove(const std::vector<char>& board, char player) {
 }
 
 int main() {
-    std::cout << "Welcome to the Tic Tac Toe Game!!\n" << std::end;
-    std::cout << "Player 1 is X || Player 2 is O\n";
+    std::cout << "Welcome to the Tic Tac Toe Game!!\n" <<std::endl;
+    std::cout << "Player 1 is X || Player 2 is O\n" << std::endl;
 
     std::vector<char> board(9, ' ');
     char current = 'X';
@@ -86,8 +86,8 @@ int main() {
     displayTable(board);
 
     while (true) {
-        int moveIndex = readMove(board, current);
-        board[moveIndex] = current;
+        int idx = readMove(board, current);
+        board[idx] = current;
         displayTable(board);
 
         char winner = checkWinner(board);
@@ -95,11 +95,10 @@ int main() {
             std::cout << winner << " won\n";
             break;
         }
-        if (filledBoard(board)) {
+        if (boardFull(board)) {
             std::cout << "Tie\n";
             break;
         }
-
         if (current == 'X') {
             current = 'O';
         } else {
@@ -107,6 +106,6 @@ int main() {
         }
     }
 
-    std::cout << "Thank you for playing Tic Tac Toe!!\n" << std::endl;
+    std::cout << "Thank you for playing Tic Tac Toe!!\n"<< std::endl;
     return 0;
 }
