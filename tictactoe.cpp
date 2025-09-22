@@ -4,11 +4,11 @@
 #include <vector>
 #include <limits>
 
-//welcome message
-//display an array and assign each square with numbers --3x3-- (1-9)
-//make an hpp file if needed
-//Which player won the game display this message
-//ending message
+//welcome message (done)
+//display an array and assign each square with numbers --3x3-- (1-9) (done)
+//make an hpp file if needed? (did not need)
+//Which player won the game display this message (done)
+//ending message (done)
 char showCell(const std::vector<char>& board, int i) {
     if (board[i] != ' ') {
         return board[i];
