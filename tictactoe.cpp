@@ -18,7 +18,7 @@ char showCell(const std::vector<char>& board, int i) {
 }
 
 void displayTable(const std::vector<char>& board) {
-    std::cout << "\n"<< std::endl;
+
     std::cout << " " << showCell(board, 0) << " | " << showCell(board, 1) << " | " << showCell(board, 2) << "\n"<< std::endl;
     std::cout << "---+---+---\n";
     std::cout << " " << showCell(board, 3) << " | " << showCell(board, 4) << " | " << showCell(board, 5) << "\n"<< std::endl;
