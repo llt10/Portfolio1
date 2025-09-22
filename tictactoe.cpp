@@ -18,13 +18,13 @@ char showCell(const std::vector<char>& board, int i) {
 }
 
 void displayTable(const std::vector<char>& board) {
-    std::cout << "\n";
-    std::cout << " " << showCell(board, 0) << " | " << showCell(board, 1) << " | " << showCell(board, 2) << "\n";
+    std::cout << "\n"<< std::endl;
+    std::cout << " " << showCell(board, 0) << " | " << showCell(board, 1) << " | " << showCell(board, 2) << "\n"<< std::endl;
     std::cout << "---+---+---\n";
-    std::cout << " " << showCell(board, 3) << " | " << showCell(board, 4) << " | " << showCell(board, 5) << "\n";
+    std::cout << " " << showCell(board, 3) << " | " << showCell(board, 4) << " | " << showCell(board, 5) << "\n"<< std::endl;
     std::cout << "---+---+---\n";
-    std::cout << " " << showCell(board, 6) << " | " << showCell(board, 7) << " | " << showCell(board, 8) << "\n";
-    std::cout << "\n";
+    std::cout << " " << showCell(board, 6) << " | " << showCell(board, 7) << " | " << showCell(board, 8) << "\n" << std::endl;
+    std::cout << "\n" << std::endl;
 }
 
 char checkWinner(const std::vector<char>& b) {
@@ -55,7 +55,7 @@ bool boardFull(const std::vector<char>& b) {
 
 int readMove(const std::vector<char>& board, char player) {
     while (true) {
-        std::cout << "Player " << player << " — enter a move (1-9): ";
+        std::cout << "Player " << player << " — enter a move (1-9): "<< std::endl;
         int choice;
         if (!(std::cin >> choice)) {
             std::cin.clear();
@@ -77,7 +77,7 @@ int readMove(const std::vector<char>& board, char player) {
 }
 
 int main() {
-    std::cout << "Welcome to the Tic Tac Toe Game!!\n" <<std::endl;
+    std::cout << "Welcome to the Tic Tac Toe Game!!\n" << std::endl;
     std::cout << "Player 1 is X || Player 2 is O\n" << std::endl;
 
     std::vector<char> board(9, ' ');
@@ -92,11 +92,11 @@ int main() {
 
         char winner = checkWinner(board);
         if (winner != ' ') {
-            std::cout << winner << " won\n";
+            std::cout << winner << " won\n"<< std::endl;
             break;
         }
         if (boardFull(board)) {
-            std::cout << "Tie\n";
+            std::cout << "It's a draw!!\n" << std::endl;
             break;
         }
         if (current == 'X') {
