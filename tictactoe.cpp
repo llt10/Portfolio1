@@ -23,7 +23,7 @@ void displayTable(const std::vector<char>& board) {
     std::cout << "---+---+---\n";
     std::cout << " " << showCell(board, 3) << " | " << showCell(board, 4) << " | " << showCell(board, 5) << std::endl;
     std::cout << "---+---+---\n";
-    std::cout << " " << showCell(board, 6) << " | " << showCell(board, 7) << " | " << showCell(board, 8) 1<< std::endl;
+    std::cout << " " << showCell(board, 6) << " | " << showCell(board, 7) << " | " << showCell(board, 8) << std::endl;
     std::cout << "\n" << std::endl;
 }
 
