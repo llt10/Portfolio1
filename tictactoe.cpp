@@ -60,11 +60,11 @@ int readMove(const std::vector<char>& board, char player) {
         if (!(std::cin >> choice)) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-            std::cout << "Please enter a number from 1 to 9.\n" << std::endl;
+            std::cout << "Error: Please enter a number from 1 to 9.\n" << std::endl;
             continue;
         }
         if (choice < 1 || choice > 9) {
-            std::cout << "Out of bounds. Choose 1-9.\n" << std::endl;
+            std::cout << "Sorry out of bounds, choose 1-9.\n" << std::endl;
             continue;
         }
         int index = choice - 1;
