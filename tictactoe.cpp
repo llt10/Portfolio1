@@ -69,7 +69,7 @@ int nextMoves(const std::vector<char>& board, char player) {
         }
         int index = choice - 1;
         if (board[index] == 'X' || board[index] == '0') {
-            std::cout << "This cell is taken, choose another.\n" std::endl;
+            std::cout << "This cell is taken, choose another.\n" << std::endl;
             continue;
         }
         return index;
