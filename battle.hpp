@@ -15,3 +15,10 @@ std::string promptArchetype(int playerNumber);
 int countMoves(const std::vector<char>& board);
 
 bool alchemSwap (std::vector<char>& board);
+
+bool paladinShift(Std::vector<char>& board);
+
+bool isAdjacent(int from, int to); 
+
+
+#endif

@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include "battle.hpp"
 
 //welcome message (done)
 //display an array and assign each square with numbers --3x3-- (1-9) (done)
@@ -106,6 +107,21 @@ int main() {
         }
     }
 
+
+//implementing the battlefield game 
+
+void playBattlefield() {
+    std::cout << "Starting Battle Mode" << srd::endl;
+
+    char p1Move = promptForMove(1,'\0');
+    char p2Move = promptForMove(2, p1Move);
+
+    std::string p1Arche = promptArchetype(1);
+    std::string p2Arche = promptArchetype(2);
+
+    std::vector<char> board (9, ' ');
+
+}
     std::cout << "Thank you for playing Tic Tac Toe!!\n"<< std::endl;
     return 0;
 }
