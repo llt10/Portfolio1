@@ -77,35 +77,35 @@ bool boardFull(const std::vector<char>& b) {
     return true;
 }
 
-int main() {
-    std::cout << "Welcome to the Tic Tac Toe Game!!\n" << std::endl;
-    std::cout << "Player 1 is X || Player 2 is O\n" << std::endl;
+// int main() {
+//     std::cout << "Welcome to the Tic Tac Toe Game!!\n" << std::endl;
+//     std::cout << "Player 1 is X || Player 2 is O\n" << std::endl;
 
-    std::vector<char> board(9, ' ');
-    char current = 'X';
+//     std::vector<char> board(9, ' ');
+//     char current = 'X';
 
-    displayTable(board);
+//     displayTable(board);
 
-    while (true) {
-        int idx = readMove(board, current);
-        board[idx] = current;
-        displayTable(board);
+//     while (true) {
+//         int idx = readMove(board, current);
+//         board[idx] = current;
+//         displayTable(board);
 
-        char winner = checkWinner(board);
-        if (winner != ' ') {
-            std::cout << winner << " won\n"<< std::endl;
-            break;
-        }
-        if (boardFull(board)) {
-            std::cout << "It's a draw!!\n" << std::endl;
-            break;
-        }
-        if (current == 'X') {
-            current = 'O';
-        } else {
-            current = 'X';
-        }
-    }
+//         char winner = checkWinner(board);
+//         if (winner != ' ') {
+//             std::cout << winner << " won\n"<< std::endl;
+//             break;
+//         }
+//         if (boardFull(board)) {
+//             std::cout << "It's a draw!!\n" << std::endl;
+//             break;
+//         }
+//         if (current == 'X') {
+//             current = 'O';
+//         } else {
+//             current = 'X';
+//         }
+//     }
 
 
 //implementing the battlefield game 
