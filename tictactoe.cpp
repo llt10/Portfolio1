@@ -159,7 +159,7 @@ void playBattlefield() {
                         } 
                     }
                 } else if (arche == "paladin") {
-                    if (countMarksOnBoard(board) < 1) {
+                    if (countMoves(board) < 1) {
                         std::cout << "No marks on board to shift. Choose a regular move instead.\n";
                         int idx = readMove(board, current);
                         board[idx] = current;
@@ -191,11 +191,11 @@ void playBattlefield() {
         displayTable(board);
         char winner = checkWinner(board);
         if (winner != ' ') {
-            int who = whichPlayerForMark(winner, p1Mark, p2Mark);
+            int who = whichPlayerForMark(winner, p1Move, p2Move);
             if (who == 1) {
-                std::cout << "Player 1 (" << p1Mark << ") won\n" << std::endl;
+                std::cout << "Player 1 (" << p1Move << ") won\n" << std::endl;
             } else if (who == 2) {
-                std::cout << "Player 2 (" << p2Mark << ") won\n" << std::endl;
+                std::cout << "Player 2 (" << p2Move << ") won\n" << std::endl;
             } else {
                 std::cout << winner << " won\n" << std::endl;
             }
@@ -205,10 +205,10 @@ void playBattlefield() {
             std::cout << "It's a draw!!\n" << std::endl;
             break;
         }
-        if (current == p1Mark) current = p2Mark;
-        else current = p1Mark;
+        if (current == p1Move) current = p2Move;
+        else current = p1Move;
     }
-}
+
 int main() {
     std::cout << "Welcome to the Tic Tac Toe Game!!\n" << std::endl;
 
@@ -223,9 +223,9 @@ int main() {
         }
 
         if (choice == 1) {
-            playRegularGame();
+            playRegular();
         } else if (choice == 2) {
-            playBattleGame();
+            playBattle();
         } else {
             std::cout << "Please enter 1 or 2.\n" << std::endl;
             continue;
