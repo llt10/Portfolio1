@@ -5,11 +5,6 @@
 #include <limits>
 #include "battle.hpp"
 
-//welcome message (done)
-//display an array and assign each square with numbers --3x3-- (1-9) (done)
-//make an hpp file if needed? (did not need)
-//Which player won the game display this message (done)
-//ending message (done)
 char showCell(const std::vector<char>& board, int i) {
     if (board[i] != ' ') {
         return board[i];
@@ -19,7 +14,6 @@ char showCell(const std::vector<char>& board, int i) {
 }
 
 void displayTable(const std::vector<char>& board) {
-
     std::cout << " " << showCell(board, 0) << " | " << showCell(board, 1) << " | " << showCell(board, 2) << std::endl;
     std::cout << "---+---+---\n";
     std::cout << " " << showCell(board, 3) << " | " << showCell(board, 4) << " | " << showCell(board, 5) << std::endl;
@@ -45,7 +39,6 @@ char checkWinner(const std::vector<char>& b) {
     return ' ';
 }
 
-
 int readMove(const std::vector<char>& board, char player) {
     while (true) {
         std::cout << "Player " << player << " — enter a move (1-9): "<< std::endl;
@@ -68,6 +61,7 @@ int readMove(const std::vector<char>& board, char player) {
         return index;
     }
 }
+
 bool boardFull(const std::vector<char>& b) {
     for (int i = 0; i < 9; ++i) {
         if (b[i] == ' ') {
@@ -77,64 +71,193 @@ bool boardFull(const std::vector<char>& b) {
     return true;
 }
 
-// int main() {
-//     std::cout << "Welcome to the Tic Tac Toe Game!!\n" << std::endl;
-//     std::cout << "Player 1 is X || Player 2 is O\n" << std::endl;
+int whichPlayerForMove(char mark, char p1Move, char p2Move) {
+    if (mark == p1Move) return 1;
+    if (mark == p2Move) return 2;
+    return 0;
+}
 
-//     std::vector<char> board(9, ' ');
-//     char current = 'X';
+bool validMarkChar(char c) {
+    if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) return true;
+    std::string allowed = "?!*~$%#";
+    return allowed.find(c) != std::string::npos;
+}
 
-//     displayTable(board);
+char promptForMove(int playerNumber, char otherPlayerMark) {
+    while (true) {
+        std::cout << "Player " << playerNumber << " choose a single-character mark: ";
+        std::string s;
+        if (!(std::cin >> s)) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
+        if (s.size() != 1) {
+            std::cout << "Enter exactly one character.\n";
+            continue;
+        }
+        char c = s[0];
+        if (!validMarkChar(c)) {
+            std::cout << "Invalid mark. Choose A-Z, a-z, or one of ? ! * ~ $ % #\n";
+            continue;
+        }
+        if (otherPlayerMark != '\0' && c == otherPlayerMark) {
+            std::cout << "That mark is already taken by the other player.\n";
+            continue;
+        }
+        return c;
+    }
+}
 
-//     while (true) {
-//         int idx = readMove(board, current);
-//         board[idx] = current;
-//         displayTable(board);
+std::string toLower(const std::string& s) {
+    std::string out = s;
+    for (char &c : out) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
+    return out;
+}
 
-//         char winner = checkWinner(board);
-//         if (winner != ' ') {
-//             std::cout << winner << " won\n"<< std::endl;
-//             break;
-//         }
-//         if (boardFull(board)) {
-//             std::cout << "It's a draw!!\n" << std::endl;
-//             break;
-//         }
-//         if (current == 'X') {
-//             current = 'O';
-//         } else {
-//             current = 'X';
-//         }
-//     }
+std::string promptArchetype(int playerNumber) {
+    while (true) {
+        std::cout << "Player " << playerNumber << " choose archetype (Paladin, Alchemist, Chronomage): ";
+        std::string s;
+        if (!(std::cin >> s)) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
+        std::string low = toLower(s);
+        if (low == "paladin" || low == "alchemist" || low == "chronomage") return low;
+        std::cout << "Invalid archetype.\n";
+    }
+}
 
+int countMoves(const std::vector<char>& board) {
+    int cnt = 0;
+    for (char c : board) if (c != ' ') ++cnt;
+    return cnt;
+}
 
-//implementing the battlefield game 
+bool isAdjacent(int from, int to) {
+    int fr = from / 3;
+    int fc = from % 3;
+    int tr = to / 3;
+    int tc = to % 3;
+    int dr = abs(fr - tr);
+    int dc = abs(fc - tc);
+    return (dr <= 1 && dc <= 1) && !(dr == 0 && dc == 0);
+}
 
-void playBattlefield() {
+bool paladinShift(std::vector<char>& board) {
+    std::cout << "Enter the position of the mark to shift (1-9): ";
+    int a;
+    if (!(std::cin >> a)) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return false;
+    }
+    if (a < 1 || a > 9) return false;
+    int from = a - 1;
+    if (board[from] == ' ') {
+        std::cout << "No mark at that position.\n";
+        return false;
+    }
+    std::cout << "Enter the destination position (1-9): ";
+    int b;
+    if (!(std::cin >> b)) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return false;
+    }
+    if (b < 1 || b > 9) return false;
+    int to = b - 1;
+    if (board[to] != ' ') {
+        std::cout << "Destination is not empty.\n";
+        return false;
+    }
+    if (!isAdjacent(from, to)) {
+        std::cout << "Destination is not adjacent.\n";
+        return false;
+    }
+    board[to] = board[from];
+    board[from] = ' ';
+    return true;
+}
+
+bool alchemistSwap(std::vector<char>& board) {
+    std::cout << "Enter first position to swap (1-9): ";
+    int a;
+    if (!(std::cin >> a)) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return false;
+    }
+    if (a < 1 || a > 9) return false;
+    int i = a - 1;
+    if (board[i] == ' ') {
+        std::cout << "No mark at first position.\n";
+        return false;
+    }
+    std::cout << "Enter second position to swap (1-9): ";
+    int b;
+    if (!(std::cin >> b)) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        return false;
+    }
+    if (b < 1 || b > 9) return false;
+    int j = b - 1;
+    if (board[j] == ' ') {
+        std::cout << "No mark at second position.\n";
+        return false;
+    }
+    if (board[i] == board[j]) {
+        std::cout << "Cannot swap two identical marks.\n";
+        return false;
+    }
+    std::swap(board[i], board[j]);
+    return true;
+}
+
+void playRegular() {
+    std::vector<char> board(9, ' ');
+    char current = 'X';
+    std::cout << "Player 1 is X || Player 2 is O\n" << std::endl;
+    displayTable(board);
+    while (true) {
+        int idx = readMove(board, current);
+        board[idx] = current;
+        displayTable(board);
+        char winner = checkWinner(board);
+        if (winner != ' ') {
+            std::cout << winner << " won\n"<< std::endl;
+            break;
+        }
+        if (boardFull(board)) {
+            std::cout << "It's a draw!!\n" << std::endl;
+            break;
+        }
+        if (current == 'X') current = 'O';
+        else current = 'X';
+    }
+}
+
+void playBattle() {
     std::cout << "Starting Battle Mode" << std::endl;
-
     char p1Move = promptForMove(1,'\0');
     char p2Move = promptForMove(2, p1Move);
-
     std::string p1Arche = promptArchetype(1);
     std::string p2Arche = promptArchetype(2);
-
     std::vector<char> board (9, ' ');
     char current = p1Move;
-
     std::cout << "Player 1: " << p1Move << " (" << p1Arche << ")\n" << std::endl;
     std::cout << "Player 2: " << p2Move << " (" << p2Arche << ")\n" << std::endl;
-
     displayTable(board);
-
     while (true) {
         int playerNum = (current == p1Move) ? 1: 2;
         std::string arche = (playerNum == 1) ? p1Arche : p2Arche;
         std::cout << " Player " << playerNum << " (" << current << ")'s turn. Archetype: " << arche << "\n" << std::endl;
-
         bool didAction = false;
         if (arche == "alchemist" || arche == "paladin" || arche == "chronomage" ) {
-            std::cout << "Choose action:\n Regular move\n Special move\n" << std::endl;
+            std::cout << "Choose action:\n1) Regular move\n2) Special move\n" << std::endl;
             std::cout << "Enter 1 or 2: " << std::endl;
             int choice;
             if (!(std::cin>> choice)) {
@@ -150,13 +273,20 @@ void playBattlefield() {
             } else {
                 if (arche == "alchemist") {
                     if (countMoves(board) < 2) {
-                        std::cout << "Not enough moves to swap." << std::endl;
+                        std::cout << "Not enough moves to swap.\n" << std::endl;
                         int idx = readMove(board, current);
                         board[idx] = current;
                         didAction = true;
                     } else {
-                        didAction = true;
-                        } 
+                        bool swapped = alchemistSwap(board);
+                        if (!swapped) {
+                            std::cout << "Swap failed; performing regular move instead.\n" << std::endl;
+                            int idx = readMove(board, current);
+                            board[idx] = current;
+                            didAction = true;
+                        } else {
+                            didAction = true;
+                        }
                     }
                 } else if (arche == "paladin") {
                     if (countMoves(board) < 1) {
@@ -187,7 +317,6 @@ void playBattlefield() {
             board[idx] = current;
             didAction = true;
         }
-
         displayTable(board);
         char winner = checkWinner(board);
         if (winner != ' ') {
@@ -208,10 +337,10 @@ void playBattlefield() {
         if (current == p1Move) current = p2Move;
         else current = p1Move;
     }
+}
 
 int main() {
     std::cout << "Welcome to the Tic Tac Toe Game!!\n" << std::endl;
-
     while (true) {
         std::cout << "Choose game type:\n1) regular\n2) battle\nEnter 1 or 2: ";
         int choice;
@@ -221,7 +350,6 @@ int main() {
             std::cout << "Invalid input. Try again.\n" << std::endl;
             continue;
         }
-
         if (choice == 1) {
             playRegular();
         } else if (choice == 2) {
@@ -230,8 +358,6 @@ int main() {
             std::cout << "Please enter 1 or 2.\n" << std::endl;
             continue;
         }
-
-        
         std::cout << "Play again? (y/n): ";
         char again;
         if (!(std::cin >> again)) {
@@ -246,8 +372,8 @@ int main() {
             break;
         }
     }
-
     std::cout << "Thank you for playing Tic Tac Toe/Battlefield!!\n"<< std::endl;
     return 0;
 }
+
 
