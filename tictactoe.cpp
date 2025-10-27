@@ -111,7 +111,7 @@ bool boardFull(const std::vector<char>& b) {
 //implementing the battlefield game 
 
 void playBattlefield() {
-    std::cout << "Starting Battle Mode" << srd::endl;
+    std::cout << "Starting Battle Mode" << std::endl;
 
     char p1Move = promptForMove(1,'\0');
     char p2Move = promptForMove(2, p1Move);
@@ -191,7 +191,7 @@ void playBattlefield() {
         displayTable(board);
         char winner = checkWinner(board);
         if (winner != ' ') {
-            int who = whichPlayerForMark(winner, p1Move, p2Move);
+            int who = whichPlayerForMove(winner, p1Move, p2Move);
             if (who == 1) {
                 std::cout << "Player 1 (" << p1Move << ") won\n" << std::endl;
             } else if (who == 2) {
