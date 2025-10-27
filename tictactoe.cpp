@@ -110,7 +110,7 @@ int main() {
 
 //implementing the battlefield game 
 
-void playBattlefield() {
+void playBattlefield() 
     std::cout << "Starting Battle Mode" << srd::endl;
 
     char p1Move = promptForMove(1,'\0');
@@ -208,7 +208,7 @@ void playBattlefield() {
         if (current == p1Mark) current = p2Mark;
         else current = p1Mark;
     }
-}
+
 
 int main() {
     std::cout << "Welcome to the Tic Tac Toe Game!!\n" << std::endl;
