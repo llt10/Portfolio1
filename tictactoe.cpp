@@ -7,6 +7,25 @@
 #include <ctime>
 #include "battle.hpp"
 
+#include <iostream>
+#include <cctype>
+#include <string>
+#include <vector>
+#include <limits>
+#include <random>
+#include <ctime>
+#include "battle.hpp"
+
+struct Entity {
+    std::string name;
+    std::string cls;
+    int hp;
+    int atk;
+    int def;
+    char mark;
+    bool isBoss;
+};
+
 char showCell(const std::vector<char>& board, int i) {
     if (board[i] != ' ') return board[i];
     return static_cast<char>('1' + i);
