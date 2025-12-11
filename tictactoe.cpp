@@ -79,19 +79,18 @@ int whichPlayerForMove(char mark, char p1Move, char p2Move) {
     return 0;
 }
 
-// wrapper to satisfy header name if implementation differs
+
 bool apprMoveChar(char c) {
     if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) return true;
     std::string allowed = "?!*~$%#";
     return allowed.find(c) != std::string::npos;
 }
 
-// if header declares alchemSwap but implementation name is alchemistSwap in other code, provide wrapper
 bool alchemSwap(std::vector<char>& board) {
     return alchemistSwap(board);
 }
 
-// --- simple AI for random move ---
+// adding AI
 int aiRandomMove(const std::vector<char>& board) {
     std::vector<int> empties;
     for (int i = 0; i < 9; ++i) if (board[i] == ' ') empties.push_back(i);
@@ -101,7 +100,7 @@ int aiRandomMove(const std::vector<char>& board) {
     return empties[dist(rng)];
 }
 
-// --- alchemistSwap implementation (kept name used above) ---
+
 bool alchemistSwap(std::vector<char>& board) {
     std::cout << "Enter first position to swap (1-9): ";
     int a;
@@ -137,7 +136,6 @@ bool alchemistSwap(std::vector<char>& board) {
     return true;
 }
 
-// --- keep paladinShift implementation as declared in header ---
 bool paladinShift(std::vector<char>& board) {
     std::cout << "Enter the position of the mark to shift (1-9): ";
     int a;
@@ -174,7 +172,6 @@ bool paladinShift(std::vector<char>& board) {
     return true;
 }
 
-// --- header-declared helper implementations used above ---
 std::string toLower(const std::string& s) {
     std::string out = s;
     for (char &c : out) c = static_cast<char>(std::tolower(static_cast<unsigned char>(c)));
@@ -238,7 +235,7 @@ bool isAdjacent(int from, int to) {
     return (dr <= 1 && dc <= 1) && !(dr == 0 && dc == 0);
 }
 
-// --- Regular play (unchanged) ---
+// regular part
 void playRegular() {
     std::vector<char> board(9, ' ');
     char current = 'X';
@@ -262,7 +259,7 @@ void playRegular() {
     }
 }
 
-// --- Battle mode (kept) ---
+// battle part
 void playBattle() {
     std::cout << "Starting Battle Mode" << std::endl;
     char p1Move = promptForMove(1,'\0');
@@ -362,11 +359,11 @@ void playBattle() {
     }
 }
 
-// --- Campaign system ---
+//  adding new Campaign system 
 
 struct Entity {
     std::string name;
-    std::string cls; // "paladin" or "alchemist" or others
+    std::string cls; 
     int hp;
     int atk;
     int def;
@@ -554,7 +551,6 @@ void playCampaign() {
         battlesDone++;
         if (i < (int)opponents.size() - 1) {
             if (eventsDone < eventsNeeded) {
-                // event
                 if (eventsDone == 0) eventHeal(player);
                 else if (eventsDone == 1) eventStatBoost(player);
                 else eventChoiceChest(player);
@@ -566,7 +562,7 @@ void playCampaign() {
     std::cout << "Congratulations " << player.name << "! You have completed the campaign and defeated the Dragon Lord.\n\n";
 }
 
-// --- main menu ---
+
 int main() {
     std::cout << "Welcome to the Tic Tac Toe Game!!\n" << std::endl;
     while (true) {
