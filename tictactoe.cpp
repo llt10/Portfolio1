@@ -87,7 +87,7 @@ bool apprMoveChar(char c) {
 }
 
 bool alchemSwap(std::vector<char>& board) {
-    return alchemistSwap(board);
+    return alchemSwap(board);
 }
 
 // adding AI
