@@ -104,28 +104,25 @@ void playBattle() {
         std::cout << "1) Regular move\n2) Special move\n";
         int choice;
         if (!(std::cin >> choice)) { std::cin.clear(); std::cin.ignore(99999, '\n'); choice = 1; }
-        bool acted = false;
         if (choice == 1) {
             int idx = readMove(board, current);
             board[idx] = current;
-            acted = true;
         } else {
             if (arche == "alchemist") {
-                if (!alchemistSwap(board)) {
+                bool ok = alchemistSwap(board);
+                if (!ok) {
                     int idx = readMove(board, current);
                     board[idx] = current;
                 }
-                acted = true;
             } else if (arche == "paladin") {
-                if (!paladinShift(board)) {
+                bool ok = paladinShift(board);
+                if (!ok) {
                     int idx = readMove(board, current);
                     board[idx] = current;
                 }
-                acted = true;
             } else {
                 int idx = readMove(board, current);
                 board[idx] = current;
-                acted = true;
             }
         }
         displayTable(board);
@@ -154,30 +151,40 @@ char playSingleMatchAgainstAI(char playerMark, char aiMark) {
         if (current == playerMark) {
             int idx = readMove(board, current);
             board[idx] = current;
+            char w = checkWinner(board);
+            displayTable(board);
+            if (w != ' ') return w;
+            if (boardFull(board)) return 'D';
+            current = aiMark;
+            int aiidx = aiRandomMove(board);
+            if (aiidx == -1) {
+                if (boardFull(board)) return 'D';
+                return 'D';
+            }
+            board[aiidx] = aiMark;
+            std::cout << "AI (" << aiMark << ") plays at " << (aiidx + 1) << std::endl;
+            char w2 = checkWinner(board);
+            displayTable(board);
+            if (w2 != ' ') return w2;
+            if (boardFull(board)) return 'D';
+            current = playerMark;
         } else {
-            int idx = aiRandomMove(board);
-            if (idx == -1) break;
-            board[idx] = current;
-            std::cout << "AI (" << current << ") plays at " << (idx + 1) << std::endl;
+            int aiidx = aiRandomMove(board);
+            if (aiidx == -1) {
+                if (boardFull(board)) return 'D';
+                return 'D';
+            }
+            board[aiidx] = aiMark;
+            std::cout << "AI (" << aiMark << ") plays at " << (aiidx + 1) << std::endl;
+            char w = checkWinner(board);
+            displayTable(board);
+            if (w != ' ') return w;
+            if (boardFull(board)) return 'D';
+            current = playerMark;
         }
-        displayTable(board);
-        char winner = checkWinner(board);
-        if (winner != ' ') return winner;
-        if (boardFull(board)) return 'D';
-        current = (current == playerMark) ? aiMark : playerMark;
     }
     return 'D';
 }
-
-struct Entity {
-    std::string name;
-    std::string cls;
-    int hp;
-    int atk;
-    int def;
-    char mark;
-    bool isBoss;
-};
 
 void eventHeal(Entity &player) {
     player.hp += 10;
@@ -323,3 +330,5 @@ int main() {
     std::cout << "Thank you for playing Tic Tac Toe!!\n"<< std::endl;
     return 0;
 }
+
+

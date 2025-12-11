@@ -29,7 +29,7 @@ char promptForMove(int playerNumber, char otherPlayerMark) {
     }
 }
 
-std::string toLowerLocal(const std::string& s) {
+static std::string toLowerLocal(const std::string& s) {
     std::string out = s;
     for (char &c : out) c = static_cast<char>(std::tolower((unsigned char)c));
     return out;
@@ -114,3 +114,4 @@ bool paladinShift(std::vector<char>& board) {
     board[from] = ' ';
     return true;
 }
+
