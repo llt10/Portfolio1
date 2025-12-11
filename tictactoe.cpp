@@ -70,97 +70,6 @@ int whichPlayerForMove(char mark, char p1Move, char p2Move) {
     return 0;
 }
 
-bool apprMoveChar(char c) {
-    if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) return true;
-    std::string allowed = "?!*~$%#";
-    return allowed.find(c) != std::string::npos;
-}
-
-bool alchemSwap(std::vector<char>& board) {
-    return alchemistSwap(board);
-}
-
-int aiRandomMove(const std::vector<char>& board) {
-    std::vector<int> empties;
-    for (int i = 0; i < 9; ++i) if (board[i] == ' ') empties.push_back(i);
-    if (empties.empty()) return -1;
-    static std::mt19937 rng(static_cast<unsigned>(std::time(nullptr)));
-    std::uniform_int_distribution<int> dist(0, (int)empties.size() - 1);
-    return empties[dist(rng)];
-}
-
-bool alchemistSwap(std::vector<char>& board) {
-    int a, b;
-    std::cout << "Enter first position to swap (1-9): ";
-    if (!(std::cin >> a)) { std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); return false; }
-    if (a < 1 || a > 9) return false;
-    int i = a - 1;
-    if (board[i] == ' ') return false;
-    std::cout << "Enter second position to swap (1-9): ";
-    if (!(std::cin >> b)) { std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); return false; }
-    if (b < 1 || b > 9) return false;
-    int j = b - 1;
-    if (board[j] == ' ') return false;
-    if (board[i] == board[j]) return false;
-    std::swap(board[i], board[j]);
-    return true;
-}
-
-bool paladinShift(std::vector<char>& board) {
-    int a, b;
-    std::cout << "Enter the position of the mark to shift (1-9): ";
-    if (!(std::cin >> a)) { std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); return false; }
-    if (a < 1 || a > 9) return false;
-    int from = a - 1;
-    if (board[from] == ' ') return false;
-    std::cout << "Enter the destination position (1-9): ";
-    if (!(std::cin >> b)) { std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); return false; }
-    if (b < 1 || b > 9) return false;
-    int to = b - 1;
-    if (board[to] != ' ') return false;
-    int fr = from / 3, fc = from % 3, tr = to / 3, tc = to % 3;
-    int dr = abs(fr - tr), dc = abs(fc - tc);
-    if (!((dr <= 1 && dc <= 1) && !(dr == 0 && dc == 0))) return false;
-    board[to] = board[from];
-    board[from] = ' ';
-    return true;
-}
-
-std::string toLower(const std::string& s) {
-    std::string out = s;
-    for (char &c : out) c = static_cast<char>(std::tolower((unsigned char)c));
-    return out;
-}
-
-std::string promptArchetype(int playerNumber) {
-    while (true) {
-        std::cout << "Player " << playerNumber << " choose archetype (Paladin, Alchemist, Chronomage): ";
-        std::string s;
-        if (!(std::cin >> s)) { std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); continue; }
-        std::string low = toLower(s);
-        if (low == "paladin" || low == "alchemist" || low == "chronomage") return low;
-    }
-}
-
-char promptForMove(int playerNumber, char otherPlayerMark) {
-    while (true) {
-        std::cout << "Player " << playerNumber << " choose a single-character mark: ";
-        std::string s;
-        if (!(std::cin >> s)) { std::cin.clear(); std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); continue; }
-        if (s.size() != 1) continue;
-        char c = s[0];
-        if (!apprMoveChar(c)) continue;
-        if (otherPlayerMark != '\0' && c == otherPlayerMark) continue;
-        return c;
-    }
-}
-
-int countMoves(const std::vector<char>& board) {
-    int cnt = 0;
-    for (char c : board) if (c != ' ') ++cnt;
-    return cnt;
-}
-
 void playRegular() {
     std::vector<char> board(9, ' ');
     char current = 'X';
@@ -177,15 +86,61 @@ void playRegular() {
     }
 }
 
-struct Entity {
-    std::string name;
-    std::string cls;
-    int hp;
-    int atk;
-    int def;
-    char mark;
-    bool isBoss;
-};
+void playBattle() {
+    std::cout << "Starting Battle Mode\n";
+    char p1Move = promptForMove(1, '\0');
+    char p2Move = promptForMove(2, p1Move);
+    std::string p1Arche = promptArchetype(1);
+    std::string p2Arche = promptArchetype(2);
+    std::vector<char> board(9, ' ');
+    char current = p1Move;
+    std::cout << "Player 1: " << p1Move << " (" << p1Arche << ")\n";
+    std::cout << "Player 2: " << p2Move << " (" << p2Arche << ")\n\n";
+    displayTable(board);
+    while (true) {
+        int playerNum = (current == p1Move ? 1 : 2);
+        std::string arche = (playerNum == 1 ? p1Arche : p2Arche);
+        std::cout << "Player " << playerNum << " (" << current << ") turn.\n";
+        std::cout << "1) Regular move\n2) Special move\n";
+        int choice;
+        if (!(std::cin >> choice)) { std::cin.clear(); std::cin.ignore(99999, '\n'); choice = 1; }
+        bool acted = false;
+        if (choice == 1) {
+            int idx = readMove(board, current);
+            board[idx] = current;
+            acted = true;
+        } else {
+            if (arche == "alchemist") {
+                if (!alchemistSwap(board)) {
+                    int idx = readMove(board, current);
+                    board[idx] = current;
+                }
+                acted = true;
+            } else if (arche == "paladin") {
+                if (!paladinShift(board)) {
+                    int idx = readMove(board, current);
+                    board[idx] = current;
+                }
+                acted = true;
+            } else {
+                int idx = readMove(board, current);
+                board[idx] = current;
+                acted = true;
+            }
+        }
+        displayTable(board);
+        char winner = checkWinner(board);
+        if (winner != ' ') {
+            int who = whichPlayerForMove(winner, p1Move, p2Move);
+            if (who == 1) std::cout << "Player 1 wins.\n";
+            else if (who == 2) std::cout << "Player 2 wins.\n";
+            else std::cout << winner << " wins.\n";
+            break;
+        }
+        if (boardFull(board)) { std::cout << "Draw.\n"; break; }
+        current = (current == p1Move ? p2Move : p1Move);
+    }
+}
 
 int damageFormula(int atk, int def) {
     int dmg = atk - def;
@@ -213,6 +168,16 @@ char playSingleMatchAgainstAI(char playerMark, char aiMark) {
     }
     return 'D';
 }
+
+struct Entity {
+    std::string name;
+    std::string cls;
+    int hp;
+    int atk;
+    int def;
+    char mark;
+    bool isBoss;
+};
 
 void eventHeal(Entity &player) {
     player.hp += 10;
@@ -255,7 +220,6 @@ bool battleUntilDeath(Entity &player, Entity &opponent) {
     std::cout << "Battle start: " << player.name << " vs " << opponent.name << "\n";
     std::cout << player.name << " HP:" << player.hp << " ATK:" << player.atk << " DEF:" << player.def << "\n";
     std::cout << opponent.name << " HP:" << opponent.hp << " ATK:" << opponent.atk << " DEF:" << opponent.def << "\n\n";
-
     while (player.hp > 0 && opponent.hp > 0) {
         char matchWinner = playSingleMatchAgainstAI(player.mark, opponent.mark);
         if (matchWinner == 'D') {
@@ -283,13 +247,10 @@ bool battleUntilDeath(Entity &player, Entity &opponent) {
                 std::cout << "You take " << dmg << " damage.\n\n";
             }
         }
-
         if (player.hp < 0) player.hp = 0;
         if (opponent.hp < 0) opponent.hp = 0;
-
         std::cout << player.name << " HP: " << player.hp << " | " << opponent.name << " HP: " << opponent.hp << "\n\n";
     }
-
     if (player.hp <= 0) {
         std::cout << "You were defeated by " << opponent.name << ".\n\n";
         return false;
@@ -300,27 +261,23 @@ bool battleUntilDeath(Entity &player, Entity &opponent) {
 
 void playCampaign() {
     std::cout << "Starting Campaign Mode\n\n";
-
     Entity player;
     std::cout << "Enter your character name: ";
     std::getline(std::cin >> std::ws, player.name);
-
     while (true) {
         std::cout << "Choose class (Paladin/Alchemist): ";
         std::string cls;
         if (!(std::cin >> cls)) continue;
-        std::string low = toLower(cls);
+        std::string low = cls;
+        for (char &c : low) c = static_cast<char>(std::tolower((unsigned char)c));
         if (low == "paladin" || low == "alchemist") { player.cls = low; break; }
     }
-
     player.hp = 50;
     player.atk = (player.cls == "paladin") ? 8 : 6;
     player.def = (player.cls == "paladin") ? 4 : 3;
     player.isBoss = false;
-
     std::cout << "Choose your mark for campaign: ";
     player.mark = promptForMove(0, '\0');
-
     std::vector<Entity> opponents = {
         {"Hermes", "god", 20, 5, 1, 'H', false},
         {"Ares", "god", 28, 7, 2, 'A', false},
@@ -328,24 +285,16 @@ void playCampaign() {
         {"Cerberus", "beast", 40, 8, 5, 'C', false},
         {"Zeus", "king", 70, 10, 6, 'Z', true}
     };
-
-    std::cout << "\nStory: You are " << player.name 
-              << ", a " << player.cls 
-              << " on a quest to defeat Zeus, King of Olympus.\n\n";
-
+    std::cout << "\nStory: You are " << player.name << ", a " << player.cls << " on a quest to defeat Zeus, King of Olympus.\n\n";
     int eventsDone = 0;
-
     for (int i = 0; i < (int)opponents.size(); ++i) {
         Entity &opp = opponents[i];
-
         if (opp.mark == player.mark) opp.mark += 1;
-
         bool won = battleUntilDeath(player, opp);
         if (!won) {
             std::cout << "Campaign failed. Restarting...\n\n";
             return;
         }
-
         if (i < (int)opponents.size() - 1 && eventsDone < 3) {
             if (eventsDone == 0) eventHeal(player);
             else if (eventsDone == 1) eventStatBoost(player);
@@ -353,9 +302,7 @@ void playCampaign() {
             eventsDone++;
         }
     }
-
-    std::cout << "Congratulations " << player.name 
-              << "! You have defeated Zeus and completed the campaign.\n\n";
+    std::cout << "Congratulations " << player.name << "! You have defeated Zeus and completed the campaign.\n\n";
 }
 
 int main() {
@@ -368,7 +315,6 @@ int main() {
         else if (choice == 2) playBattle();
         else if (choice == 3) playCampaign();
         else continue;
-
         std::cout << "Play again? (y/n): ";
         char again;
         if (!(std::cin >> again)) break;
