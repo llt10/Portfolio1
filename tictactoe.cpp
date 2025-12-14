@@ -194,8 +194,9 @@ void playCampaign() {
             if(current==player.mark){ idx=readMove(board,current); board[idx]=current; }
             else { do{ idx = std::rand()%9; } while(board[idx]!=' '); board[idx]=current; }
             
-            char w = checkWinner(board);
+char w = checkWinner(board);
 if (w != ' ') {
+
     if (w == player.mark) {
         std::cout << "\nYou won this round!\n";
         enemy.health -= damage(player, enemy);
@@ -207,10 +208,19 @@ if (w != ' ') {
     std::cout << "Health " << player.name << ": " << player.health
               << " | " << enemy.name << ": " << enemy.health << "\n";
 
-    // reset for next round
-    if (player.health > 0 && enemy.health > 0) {
+    if (player.health <= 0 || enemy.health <= 0) {
+        return; 
+    }
+
+    char again;
+    std::cout << "Play another round? (y/n): ";
+    std::cin >> again;
+
+    if (again == 'y' || again == 'Y') {
         board.assign(9,' ');
         displayTable(board);
+    } else {
+        return; // exit 
     }
 }
 
