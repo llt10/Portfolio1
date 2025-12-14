@@ -61,7 +61,37 @@ void playRegular() {
 }
 
 void playBattle() {
-    std::cout << "Battle mode placeholder — works & exits correctly\n";
+    std::vector<char> board(9, ' ');
+
+    char p1 = promptForMove(1, '\0');
+    char p2 = promptForMove(2, p1);
+
+    char current = p1;
+
+    while (true) {
+        display(board);
+
+        if (current == p1) {
+            board[readMove(board, p1)] = p1;
+        } else {
+            board[readMove(board, p2)] = p2;
+        }
+
+        char w = winner(board);
+        if (w != ' ') {
+            display(board);
+            std::cout << "Player " << w << " wins!\n";
+            return;
+        }
+
+        if (countMoves(board) == 9) {
+            display(board);
+            std::cout << "It's a draw!\n";
+            return;
+        }
+
+        current = (current == p1) ? p2 : p1;
+    }
 }
 
 struct Entity {
