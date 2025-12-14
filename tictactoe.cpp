@@ -1,141 +1,98 @@
 #include <iostream>
 #include <vector>
-#include <limits>
 #include <random>
+#include <ctime>
 #include "battle.hpp"
-
-void playRegular();
-void playBattle();
-void playCampaign();
-
-char showCell(const std::vector<char>& b, int i) {
-    return b[i] == ' ' ? char('1' + i) : b[i];
-}
-
-void display(const std::vector<char>& b) {
-    for (int i = 0; i < 9; i += 3) {
-        std::cout << " " << showCell(b,i) << " | "
-                  << showCell(b,i+1) << " | "
-                  << showCell(b,i+2) << "\n";
-        if (i < 6) std::cout << "---+---+---\n";
-    }
-    std::cout << "\n";
-}
-
-char winner(const std::vector<char>& b) {
-    int w[8][3] = {{0,1,2},{3,4,5},{6,7,8},{0,3,6},
-                   {1,4,7},{2,5,8},{0,4,8},{2,4,6}};
-    for (auto &l : w)
-        if (b[l[0]] != ' ' && b[l[0]] == b[l[1]] && b[l[1]] == b[l[2]])
-            return b[l[0]];
-    return ' ';
-}
-
-int readMove(const std::vector<char>& b, char p) {
-    int x;
-    while (true) {
-        std::cout << "Player " << p << " — enter a move (1-9): ";
-        std::cin >> x;
-        if (x >= 1 && x <= 9 && b[x-1] == ' ') return x-1;
-    }
-}
-
-void playRegular() {
-    std::vector<char> b(9, ' ');
-    char p = 'X';
-    while (true) {
-        display(b);
-        b[readMove(b,p)] = p;
-        if (winner(b) != ' ') {
-            display(b);
-            std::cout << p << " wins!\n";
-            return;
-        }
-        if (countMoves(b) == 9) {
-            display(b);
-            std::cout << "Draw!\n";
-            return;
-        }
-        p = (p == 'X') ? 'O' : 'X';
-    }
-}
-
-void playBattle() {
-    std::vector<char> board(9, ' ');
-
-    char p1 = promptForMove(1, '\0');
-    char p2 = promptForMove(2, p1);
-
-    char current = p1;
-
-    while (true) {
-        display(board);
-
-        if (current == p1) {
-            board[readMove(board, p1)] = p1;
-        } else {
-            board[readMove(board, p2)] = p2;
-        }
-
-        char w = winner(board);
-        if (w != ' ') {
-            display(board);
-            std::cout << "Player " << w << " wins!\n";
-            return;
-        }
-
-        if (countMoves(board) == 9) {
-            display(board);
-            std::cout << "It's a draw!\n";
-            return;
-        }
-
-        current = (current == p1) ? p2 : p1;
-    }
-}
 
 struct Entity {
     std::string name;
     int hp, atk, def;
     char mark;
+    bool boss;
 };
+
+void draw(const std::vector<char>& b) {
+    for (int i = 0; i < 9; i++) {
+        std::cout << (b[i] == ' ' ? char('1' + i) : b[i]);
+        if (i % 3 != 2) std::cout << " | ";
+        if (i % 3 == 2 && i != 8) std::cout << "\n--+---+--\n";
+    }
+    std::cout << "\n\n";
+}
+
+char winner(const std::vector<char>& b) {
+    int w[8][3] = {{0,1,2},{3,4,5},{6,7,8},{0,3,6},{1,4,7},{2,5,8},{0,4,8},{2,4,6}};
+    for (auto &x : w)
+        if (b[x[0]] != ' ' && b[x[0]] == b[x[1]] && b[x[1]] == b[x[2]])
+            return b[x[0]];
+    return ' ';
+}
 
 int aiMove(const std::vector<char>& b) {
     std::vector<int> e;
-    for (int i=0;i<9;i++) if (b[i]==' ') e.push_back(i);
-    static std::mt19937 g(time(0));
-    return e[g()%e.size()];
+    for (int i = 0; i < 9; i++) if (b[i] == ' ') e.push_back(i);
+    static std::mt19937 r(time(0));
+    return e[r() % e.size()];
+}
+
+char playMatch(char p, char ai) {
+    std::vector<char> b(9, ' ');
+    char cur = p;
+    while (true) {
+        if (cur == p) {
+            int m;
+            std::cin >> m;
+            m--;
+            if (m < 0 || m > 8 || b[m] != ' ') continue;
+            b[m] = p;
+        } else b[aiMove(b)] = ai;
+        draw(b);
+        char w = winner(b);
+        if (w != ' ') return w;
+        if (countMoves(b) == 9) return 'D';
+        cur = (cur == p ? ai : p);
+    }
+}
+
+void playRegular() {
+    char w = playMatch('X', 'O');
+    if (w == 'D') std::cout << "Draw\n";
+    else std::cout << w << " wins\n";
+}
+
+void playBattle() {
+    char p = promptForMove(1, '\0');
+    char e = promptForMove(2, p);
+    playMatch(p, e);
 }
 
 void playCampaign() {
-    Entity p;
-    std::cout << "Enter name: ";
-    std::cin >> p.name;
-    p.hp = 50; p.atk = 8; p.def = 4;
-    p.mark = promptForMove(0,'\0');
+    Entity player;
+    std::cout << "Name: ";
+    std::cin >> player.name;
+    player.mark = promptForMove(0, '\0');
+    player.hp = 50; player.atk = 8; player.def = 4;
 
-    Entity enemy{"Zeus",30,6,2,'Z'};
+    std::vector<Entity> gods = {
+        {"Hermes",20,5,1,'H',false},
+        {"Ares",30,7,2,'A',false},
+        {"Athena",35,6,4,'T',false},
+        {"Hades",45,8,5,'D',false},
+        {"Zeus",60,10,6,'Z',true}
+    };
 
-    while (p.hp > 0 && enemy.hp > 0) {
-        std::vector<char> b(9,' ');
-        char turn = p.mark;
-        while (true) {
-            if (turn == p.mark)
-                b[readMove(b,p.mark)] = p.mark;
-            else
-                b[aiMove(b)] = enemy.mark;
-
-            display(b);
-            char w = winner(b);
-            if (w != ' ' || countMoves(b)==9) {
-                if (w == p.mark) enemy.hp -= std::max(0,p.atk-enemy.def);
-                if (w == enemy.mark) p.hp -= std::max(0,enemy.atk-p.def);
-                break;
-            }
-            turn = (turn==p.mark)?enemy.mark:p.mark;
+    for (auto &g : gods) {
+        while (player.hp > 0 && g.hp > 0) {
+            char w = playMatch(player.mark, g.mark);
+            if (w == player.mark) g.hp -= std::max(0, player.atk - g.def);
+            else if (w == g.mark) player.hp -= std::max(0, g.atk - player.def);
+        }
+        if (player.hp <= 0) {
+            std::cout << "You lost\n";
+            return;
         }
     }
-    std::cout << (p.hp>0?"Campaign complete!\n":"You died.\n");
+    std::cout << "You defeated Zeus and won the campaign\n";
 }
 
 int main() {
@@ -143,13 +100,12 @@ int main() {
         std::cout << "1) regular\n2) battle\n3) campaign\nChoose: ";
         int c;
         std::cin >> c;
-        if (c==1) playRegular();
-        else if (c==2) playBattle();
-        else if (c==3) playCampaign();
-        else continue;
-
+        if (c == 1) playRegular();
+        else if (c == 2) playBattle();
+        else if (c == 3) playCampaign();
         std::cout << "Play again? (y/n): ";
-        char a; std::cin >> a;
-        if (a!='y' && a!='Y') break;
+        char a;
+        std::cin >> a;
+        if (a != 'y') break;
     }
 }
