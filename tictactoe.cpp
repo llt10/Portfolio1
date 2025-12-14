@@ -200,6 +200,7 @@ void playCampaign() {
                 else player.health-=damage(enemy,player);
                 std::cout<<"Health "<<player.name<<": "<<player.health<<" | "<<enemy.name<<": "<<enemy.health<<"\n";
                 if(player.health>0 && enemy.health>0) board.assign(9,' ');
+                displayTable(board);
             }
 
             if(boardFull(board)) board.assign(9,' ');
