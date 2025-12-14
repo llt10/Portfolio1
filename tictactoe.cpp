@@ -159,8 +159,8 @@ void playBattle() {
         }
         displayTable(board);
         char w=checkWinner(board);
-        if(w!=' '){ int who=whichPlayerForMove(w,p1Move,p2Move); std::cout<<"Player "<<who<<" won!\n"; break; }
-        if(boardFull(board)) { std::cout<<"Draw!\n"; break; }
+        if(w!=' '){ int who=whichPlayerForMove(w,p1Move,p2Move); std::cout<<"Player "<<who<<" won!\n"; return; }
+        if(boardFull(board)) { std::cout<<"Draw!\n"; return; }
         current=(current==p1Move)?p2Move:p1Move;
     }
 }
