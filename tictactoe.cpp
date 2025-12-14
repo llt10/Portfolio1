@@ -5,6 +5,9 @@
 #include <ctime>
 #include "battle.hpp"
 
+void playRegular();
+void playBattle();
+void playCampaign();
 
 int readMove(const std::vector<char>& board, char mark) {
     while (true) {
