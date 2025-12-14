@@ -5,9 +5,6 @@
 #include <ctime>
 #include "battle.hpp"
 
-void playRegular();
-void playBattle();
-void playCampaign();
 
 int readMove(const std::vector<char>& board, char mark) {
     while (true) {
@@ -77,6 +74,9 @@ void playCampaign() {
 }
 
 //main
+void playRegular();
+void playBattle();
+void playCampaign();
 
 int main() {
     std::cout << "Welcome to the Tic Tac Toe Game!!\n\n";
