@@ -193,15 +193,18 @@ void playCampaign() {
             int idx;
             if(current==player.mark){ idx=readMove(board,current); board[idx]=current; }
             else { do{ idx = std::rand()%9; } while(board[idx]!=' '); board[idx]=current; }
+            
+            char w = checkWinner(board);
+            if (w != ' ') {
+            if (w == player.mark) enemy.health -= damage(player, enemy);
+         else player.health -= damage(enemy, player);
 
-            char w=checkWinner(board);
-            if(w!=' '){
-                if(w==player.mark) enemy.health-=damage(player,enemy);
-                else player.health-=damage(enemy,player);
-                std::cout<<"Health "<<player.name<<": "<<player.health<<" | "<<enemy.name<<": "<<enemy.health<<"\n";
-                if(player.health>0 && enemy.health>0) board.assign(9,' ');
-                displayTable(board);
-            }
+    std::cout << "Health " << player.name << ": " << player.health
+              << " | " << enemy.name << ": " << enemy.health << "\n";
+
+    board.assign(9,' ');
+}
+
 
             if(boardFull(board)) board.assign(9,' ');
             current=(current==player.mark)?enemy.mark:player.mark;
