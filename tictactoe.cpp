@@ -76,16 +76,42 @@ void playCampaign() {
 //main
 
 int main() {
-    while (true) {
-        std::cout << "1) campaign\nChoose: ";
-        int c;
-        std::cin >> c;
+    std::cout << "Welcome to the Tic Tac Toe Game!!\n\n";
 
-        if (c == 1) playCampaign();
+    while (true) {
+        std::cout << "Choose game type:\n";
+        std::cout << "1) regular\n";
+        std::cout << "2) battle\n";
+        std::cout << "3) campaign\n";
+        std::cout << "Enter 1, 2, or 3: ";
+
+        int choice;
+        if (!(std::cin >> choice)) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            std::cout << "Invalid input.\n\n";
+            continue;
+        }
+
+        if (choice == 1) {
+            playRegular();
+        } else if (choice == 2) {
+            playBattle();
+        } else if (choice == 3) {
+            playCampaign();
+        } else {
+            std::cout << "Please choose 1, 2, or 3.\n\n";
+            continue;
+        }
 
         std::cout << "Play again? (y/n): ";
         char again;
         std::cin >> again;
         if (again != 'y' && again != 'Y') break;
+
+        std::cout << "\n";
     }
+
+    std::cout << "Thank you for playing!\n";
+    return 0;
 }
