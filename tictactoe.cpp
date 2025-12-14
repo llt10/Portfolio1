@@ -195,15 +195,25 @@ void playCampaign() {
             else { do{ idx = std::rand()%9; } while(board[idx]!=' '); board[idx]=current; }
             
             char w = checkWinner(board);
-            if (w != ' ') {
-            if (w == player.mark) enemy.health -= damage(player, enemy);
-         else player.health -= damage(enemy, player);
+if (w != ' ') {
+    if (w == player.mark) {
+        std::cout << "\nYou won this round!\n";
+        enemy.health -= damage(player, enemy);
+    } else {
+        std::cout << "\n" << enemy.name << " won this round!\n";
+        player.health -= damage(enemy, player);
+    }
 
     std::cout << "Health " << player.name << ": " << player.health
               << " | " << enemy.name << ": " << enemy.health << "\n";
 
-    board.assign(9,' ');
+    // reset for next round
+    if (player.health > 0 && enemy.health > 0) {
+        board.assign(9,' ');
+        displayTable(board);
+    }
 }
+
 
 
             if(boardFull(board)) board.assign(9,' ');
@@ -212,7 +222,7 @@ void playCampaign() {
 
         if(player.health<=0){ std::cout<<"You have fallen. Game Over.\n"; return; }
         else {
-            std::cout<<"You defeated "<<enemy.name<<"!\n";
+            std::cout<<"You defeated "<< enemy.name<<"!\n";
             if(i<enemies.size()-1){
                 std::cout<<"Fountain found! 1) Heal 2) Boost Attack: ";
                 int choice; std::cin>>choice;
