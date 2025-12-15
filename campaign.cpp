@@ -3,18 +3,12 @@
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
+#include <stdexcept>
 
-
-
-struct Character {
-    std::string name;
-    std::string role;
-    int health;
-    int attack;
-    int defense;
-};
-
-
+// ---------------- TIC TAC TOE SIMULATION ----------------
+//  1  = player wins
+// -1  = enemy wins
+//  0  = draw
 int playSingleTicTacToeMatch() {
     int roll = rand() % 3;
     if (roll == 0) return 1;
@@ -22,6 +16,7 @@ int playSingleTicTacToeMatch() {
     return 0;
 }
 
+// ---------------- EVENTS ----------------
 
 void healingEvent(Character& player) {
     std::cout << "You find a healing shrine. +10 HP\n";
@@ -39,6 +34,7 @@ void choiceEvent(Character& player) {
     std::cout << "2) Gain +5 HP\n";
     int choice;
     std::cin >> choice;
+
     if (choice == 1) {
         player.attack += 3;
         std::cout << "Your attack increases!\n";
@@ -48,11 +44,12 @@ void choiceEvent(Character& player) {
     }
 }
 
-//battle
+// ---------------- BATTLE ----------------
 
 void battle(Character& player, int enemyNumber, bool finalBoss = false) {
     Character enemy;
-    enemy.name = finalBoss ? "The Dark Overlord" : "Enemy " + std::to_string(enemyNumber);
+    enemy.name = finalBoss ? "The Dark Overlord"
+                           : "Enemy " + std::to_string(enemyNumber);
     enemy.health = finalBoss ? 40 : 25 + enemyNumber * 5;
     enemy.attack = finalBoss ? 8 : 5 + enemyNumber;
     enemy.defense = finalBoss ? 4 : 2 + enemyNumber / 2;
@@ -96,12 +93,14 @@ void battle(Character& player, int enemyNumber, bool finalBoss = false) {
     std::cout << enemy.name << " defeated!\n";
 }
 
-//CAMPAIGN
+// ---------------- CAMPAIGN ----------------
 
 void playCampaign() {
     srand(static_cast<unsigned int>(time(nullptr)));
 
     Character player;
+    std::string classType;
+
     std::cout << "\nYou awaken in a land shattered by endless war.\n";
     std::cout << "Five trials stand between you.\n\n";
 
@@ -109,11 +108,17 @@ void playCampaign() {
     std::cin >> player.name;
 
     std::cout << "Choose class (Paladin / Alchemist): ";
-    std::cin >> player.role;
+    std::cin >> classType;
 
     player.health = 50;
-    player.attack = (player.role == "Paladin") ? 8 : 6;
-    player.defense = (player.role == "Paladin") ? 6 : 4;
+
+    if (classType == "Paladin" || classType == "paladin") {
+        player.attack = 8;
+        player.defense = 6;
+    } else {
+        player.attack = 6;
+        player.defense = 4;
+    }
 
     try {
         battle(player, 1);
@@ -128,12 +133,12 @@ void playCampaign() {
         battle(player, 4);
         healingEvent(player);
 
-        battle(player, 5, true); 
+        battle(player, 5, true); // FINAL BOSS
 
         std::cout << "\nYou have conquered the campaign!\n";
         std::cout << "Peace returns to the land. Victory is yours.\n\n";
     }
     catch (...) {
-        playCampaign(); // restart 
+        playCampaign(); // restart on death
     }
 }
