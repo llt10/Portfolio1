@@ -18,11 +18,14 @@ struct Character {
 };
 
 void displayBoard(const vector<char>& board){
-    cout << " " << board[0] << " | " << board[1] << " | " << board[2] << "\n";
+    auto showCell = [&](int i) {
+        return board[i] != ' ' ? board[i] : static_cast<char>('1' + i);
+    };
+    cout << " " << showCell(0) << " | " << showCell(1) << " | " << showCell(2) << "\n";
     cout << "---+---+---\n";
-    cout << " " << board[3] << " | " << board[4] << " | " << board[5] << "\n";
+    cout << " " << showCell(3) << " | " << showCell(4) << " | " << showCell(5) << "\n";
     cout << "---+---+---\n";
-    cout << " " << board[6] << " | " << board[7] << " | " << board[8] << "\n\n";
+    cout << " " << showCell(6) << " | " << showCell(7) << " | " << showCell(8) << "\n\n";
 }
 
 char checkWinner(const vector<char>& b) {
