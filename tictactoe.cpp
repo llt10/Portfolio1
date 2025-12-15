@@ -90,18 +90,15 @@ int playTicTacToeRound() {
     vector<char> board(9, ' ');
     displayTable(board);
     while (true) {
-        cout << "Your turn:\n";
         int move = readMove(board, 'X');
         board[move] = 'X';
         displayTable(board);
         if (checkWinner(board) == 'X') return 1;
         if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) return 0;
-        cout << "Enemy's turn:\n";
         vector<int> options;
         for (int i = 0; i < 9; i++) if (board[i] == ' ') options.push_back(i);
         int enemyMove = options[rand() % options.size()];
         board[enemyMove] = 'O';
-        cout << "Enemy chooses position " << enemyMove + 1 << "\n";
         displayTable(board);
         if (checkWinner(board) == 'O') return -1;
         if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) return 0;
@@ -111,79 +108,85 @@ int playTicTacToeRound() {
 void enemySpecial(Character& player, Character& enemy) {
     int choice = rand() % 3;
     switch(choice) {
-        case 0: cout << enemy.name << " uses Power Strike! -3 HP\n"; player.health = max(0, player.health - 3); break;
-        case 1: cout << enemy.name << " shields! +2 DEF this round\n"; enemy.defense += 2; break;
-        case 2: cout << enemy.name << " heals slightly +2 HP\n"; enemy.health += 2; break;
+        case 0: player.health = max(0, player.health - 3); break;
+        case 1: enemy.defense += 2; break;
+        case 2: enemy.health += 2; break;
     }
 }
 
 void finalBossSpecial(Character& player, Character& enemy) {
     int choice = rand() % 3;
     switch(choice) {
-        case 0: cout << enemy.name << " uses Shadow Burst! -5 HP\n"; player.health = max(0, player.health - 5); break;
-        case 1: cout << enemy.name << " uses Dark Shield! +4 DEF\n"; enemy.defense += 4; break;
-        case 2: cout << enemy.name << " uses Life Drain! -3 HP to player, +3 HP to self\n"; player.health = max(0, player.health - 3); enemy.health += 3; break;
+        case 0: player.health = max(0, player.health - 5); break;
+        case 1: enemy.defense += 4; break;
+        case 2: player.health = max(0, player.health - 3); enemy.health += 3; break;
     }
 }
 
-void battle(Character& player, int enemyNum, bool boss=false) {
+bool battle(Character& player, int enemyNum, bool boss=false) {
     Character enemy;
     enemy.name = boss ? "Dark Overlord" : "Enemy " + to_string(enemyNum);
     enemy.health = boss ? 60 : 20 + enemyNum*5;
     enemy.attack = boss ? 10 : 5 + enemyNum;
     enemy.defense = boss ? 6 : 2 + enemyNum;
-    cout << "\nBattle vs " << enemy.name << "\n";
     while (player.health > 0 && enemy.health > 0) {
         int result = playTicTacToeRound();
-        if (result == 1) { int dmg = max(0, player.attack - enemy.defense); enemy.health -= dmg; cout << "You won the match! Enemy takes " << dmg << " damage.\n"; }
-        else if (result == -1) { int dmg = max(0, enemy.attack - player.defense); player.health -= dmg; cout << "Enemy won the round! You take " << dmg << " damage.\n"; }
-        else { cout << "Draw. No damage dealt.\n"; }
+        if (result == 1) {
+            int dmg = max(0, player.attack - enemy.defense);
+            enemy.health -= dmg;
+        } else if (result == -1) {
+            int dmg = max(0, enemy.attack - player.defense);
+            player.health -= dmg;
+        }
         if (boss) finalBossSpecial(player, enemy);
-        else if (rand()%4 == 0) enemySpecial(player, enemy);
-        cout << "Player HP: " << player.health << " | Enemy HP: " << enemy.health << "\n";
+        else if (rand()%4==0) enemySpecial(player, enemy);
     }
-    if (player.health <= 0) throw runtime_error("Player defeated");
-    cout << enemy.name << " defeated!\n";
-    int goldEarned = rand()%5 + 1;
-    player.gold += goldEarned;
-    cout << "You earn " << goldEarned << " gold.\n";
+    if (player.health <= 0) { cout << "You have fallen.\n"; return false; }
+    else { cout << "X won the battle!\n"; return true; }
 }
 
-void healingEvent(Character& player) { cout << "You find a healing shrine. +10 HP\n"; player.health += 10; }
-void curseEvent(Character& player) { cout << "A cursed mist weakens you. -2 DEF\n"; player.defense = max(0, player.defense - 2); }
-void choiceEvent(Character& player) { cout << "A stranger offers you power.\n1) Gain +3 ATK\n2) Gain +5 HP\n"; int choice; cin >> choice; if(choice==1){player.attack+=3;cout<<"Your attack increases!\n";} else{player.health+=5;cout<<"You feel healthier!\n";} }
+void healingEvent(Character& player) { player.health += 10; }
+void curseEvent(Character& player) { player.defense = max(0, player.defense - 2); }
+void choiceEvent(Character& player) {
+    int choice; cin >> choice;
+    if(choice==1) player.attack+=3;
+    else player.health+=5;
+}
 void shopEvent(Character& player){
     int choice=-1;
     while(choice!=0){
-        cout << "\nYou enter a merchant's shop. You have " << player.gold << " gold.\n";
-        cout << "1) Health Potion +10 HP (5 gold)\n2) Steel Sword +2 ATK (7 gold)\n3) Armor +2 DEF (7 gold)\n0) Leave shop\nEnter your choice: ";
         cin >> choice;
         switch(choice){
-            case 1: if(player.gold>=5){player.health+=10;player.gold-=5;cout<<"Health increased!\n";} else cout<<"Not enough gold.\n"; break;
-            case 2: if(player.gold>=7){player.attack+=2;player.gold-=7;cout<<"Attack increased!\n";} else cout<<"Not enough gold.\n"; break;
-            case 3: if(player.gold>=7){player.defense+=2;player.gold-=7;cout<<"Defense increased!\n";} else cout<<"Not enough gold.\n"; break;
-            case 0: cout<<"Leaving shop.\n"; break;
-            default: cout<<"Invalid choice.\n"; break;
+            case 1: if(player.gold>=5){player.health+=10;player.gold-=5;} break;
+            case 2: if(player.gold>=7){player.attack+=2;player.gold-=7;} break;
+            case 3: if(player.gold>=7){player.defense+=2;player.gold-=7;} break;
+            case 0: break;
         }
     }
 }
 
 void playCampaign() {
-    try {
-        Character player;
-        cout<<"\nYou awaken in a land shattered by endless war.\nFive trials stand between you.\n\n";
-        cout<<"Enter your hero's name: "; cin>>player.name;
-        cout<<"Choose class (Paladin / Alchemist): "; cin>>player.role;
-        if(player.role=="Paladin"){player.health=50;player.attack=8;player.defense=6;} else{player.health=45;player.attack=6;player.defense=4;}
-        cout<<"\nA lone scout blocks your path.\n"; battle(player,1); healingEvent(player);
-        cout<<"\nA corrupted soldier rises from the ruins.\n"; battle(player,2); curseEvent(player);
-        cout<<"\nA brutal warlord challenges you.\n"; battle(player,3); choiceEvent(player);
-        cout<<"\nYou find a traveling merchant.\n"; shopEvent(player);
-        cout<<"\nThe Dark Overlord’s lieutenant confronts you.\n"; battle(player,4); healingEvent(player);
-        cout<<"\nThe Dark Overlord emerges.\n"; battle(player,5,true);
-        cout<<"\nThe land begins to heal. You are victorious!\n";
-        char again; cout<<"Play campaign again? (y/n): "; cin>>again; if(again=='y'||again=='Y') playCampaign();
-    } catch(...) { cout<<"\nYou have fallen.\n"; char again; cout<<"Restart campaign? (y/n): "; cin>>again; if(again=='y'||again=='Y') playCampaign();}
+    Character player;
+    cout << "Enter your hero's name: "; cin >> player.name;
+    cout << "Choose class (Paladin / Alchemist): "; cin >> player.role;
+    if(player.role=="Paladin"){player.health=50;player.attack=8;player.defense=6;}
+    else{player.health=45;player.attack=6;player.defense=4;}
+
+    if(!battle(player,1)) goto restart; healingEvent(player);
+    if(!battle(player,2)) goto restart; curseEvent(player);
+    if(!battle(player,3)) goto restart; choiceEvent(player);
+    shopEvent(player);
+    if(!battle(player,4)) goto restart; healingEvent(player);
+    if(!battle(player,5,true)) goto restart;
+
+    cout << "You have completed the campaign! Congratulations!\n";
+    char again; cout << "Play again? (y/n): "; cin>>again;
+    if(again=='y'||again=='Y') playCampaign();
+    return;
+
+restart:
+    char again; cout << "Restart campaign? (y/n): "; cin>>again;
+    if(again=='y'||again=='Y') playCampaign();
 }
 
 int main() {
