@@ -222,21 +222,44 @@ void playRegular() {
 
 // main
 int main() {
-    while (true) {
-        std::cout << "\n1) Regular\n2) Campaign\nChoice: ";
-        int c;
-        std::cin >> c;
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
 
-        if (c == 1) playRegular();
-        else if (c == 2) playCampaign();
-        else continue;
+    while (true) {
+        std::cout << "\nWelcome to Tic Tac Toe!\n";
+        std::cout << "Choose game type:\n";
+        std::cout << "1) Regular\n";
+        std::cout << "2) Battle\n";
+        std::cout << "3) Campaign\n";
+        std::cout << "Enter choice: ";
+
+        int choice;
+        if (!(std::cin >> choice)) {
+            std::cin.clear();
+            std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+            continue;
+        }
+
+        if (choice == 1) {
+            playRegular();
+        }
+        else if (choice == 2) {
+            playBattleMode();   
+        }
+        else if (choice == 3) {
+            playCampaign();
+        }
+        else {
+            std::cout << "Invalid choice.\n";
+            continue;
+        }
 
         std::cout << "\nPlay again? (y/n): ";
-        char a;
-        std::cin >> a;
-        if (a != 'y' && a != 'Y') break;
+        char again;
+        std::cin >> again;
+        if (again != 'y' && again != 'Y') break;
     }
 
     std::cout << "Thanks for playing!\n";
     return 0;
 }
+
