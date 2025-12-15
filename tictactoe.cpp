@@ -1,4 +1,5 @@
 #include <iostream>
+#include "battle.hpp"
 #include <vector>
 #include <cstdlib>
 #include <ctime>
@@ -7,41 +8,6 @@
 #include <string>
 
 using namespace std;
-
-char showCell(const vector<char>& board, int i) {
-    return (board[i] != ' ') ? board[i] : static_cast<char>('1' + i);
-}
-
-void displayTable(const vector<char>& board) {
-    cout << " " << showCell(board, 0) << " | " << showCell(board, 1) << " | " << showCell(board, 2) << endl;
-    cout << "---+---+---\n";
-    cout << " " << showCell(board, 3) << " | " << showCell(board, 4) << " | " << showCell(board, 5) << endl;
-    cout << "---+---+---\n";
-    cout << " " << showCell(board, 6) << " | " << showCell(board, 7) << " | " << showCell(board, 8) << endl;
-    cout << "\n";
-}
-
-char checkWinner(const vector<char>& b) {
-    const int lines[8][3] = {{0,1,2},{3,4,5},{6,7,8},{0,3,6},{1,4,7},{2,5,8},{0,4,8},{2,4,6}};
-    for (int i = 0; i < 8; ++i) {
-        int a = lines[i][0], c = lines[i][1], d = lines[i][2];
-        if (b[a] != ' ' && b[a] == b[c] && b[c] == b[d])
-            return b[a];
-    }
-    return ' ';
-}
-
-int readMove(const vector<char>& board, char player) {
-    while (true) {
-        cout << "Player " << player << " — enter a move (1-9): ";
-        int choice;
-        if (!(cin >> choice)) { cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n'); continue; }
-        if (choice < 1 || choice > 9) { cout << "Out of bounds. Choose 1-9.\n"; continue; }
-        int index = choice - 1;
-        if (board[index] != ' ') { cout << "Cell taken. Choose another.\n"; continue; }
-        return index;
-    }
-}
 
 struct Character {
     string name;
@@ -52,125 +18,108 @@ struct Character {
     int gold = 0;
 };
 
-void playRegular() {
-    vector<char> board(9, ' ');
-    char current = 'X';
-    cout << "Player 1 is X || Player 2 is O\n" << endl;
-    displayTable(board);
-    while (true) {
-        int idx = readMove(board, current);
-        board[idx] = current;
-        displayTable(board);
-        char winner = checkWinner(board);
-        if (winner != ' ') { cout << winner << " won the game!\n\n"; break; }
-        if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) { cout << "It's a draw!\n\n"; break; }
-        current = (current == 'X') ? 'O' : 'X';
+char checkWinner(const vector<char>& b) {
+    const int lines[8][3] = {{0,1,2},{3,4,5},{6,7,8},{0,3,6},{1,4,7},{2,5,8},{0,4,8},{2,4,6}};
+    for(int i=0;i<8;i++){
+        int a=lines[i][0], b1=lines[i][1], c=lines[i][2];
+        if(b[a]!=' ' && b[a]==b[b1] && b[b1]==b[c]) return b[a];
     }
+    return ' ';
 }
 
-void playBattle() {
-    char p1Move = 'X';
-    char p2Move = 'O';
-    vector<char> board(9, ' ');
-    cout << "Battle mode! Player 1: " << p1Move << " vs Player 2: " << p2Move << endl;
-    displayTable(board);
-    char current = p1Move;
-    while (true) {
-        int idx = readMove(board, current);
-        board[idx] = current;
-        displayTable(board);
-        char winner = checkWinner(board);
-        if (winner != ' ') { cout << winner << " won the battle!\n\n"; break; }
-        if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) { cout << "Battle draw!\n\n"; break; }
-        current = (current == p1Move) ? p2Move : p1Move;
+int readMove(const vector<char>& board, char player){
+    while(true){
+        int choice;
+        if(player=='X') cout<<"Player "<<player<<" — enter a move (1-9): ";
+        vector<int> options;
+        for(int i=0;i<9;i++) if(board[i]==' ') options.push_back(i);
+        if(player=='O'){ choice=options[rand()%options.size()]+1; cout<<"Enemy chooses position "<<choice<<"\n"; }
+        else if(!(cin>>choice)){ cin.clear(); cin.ignore(numeric_limits<streamsize>::max(),'\n'); continue; }
+        if(choice<1 || choice>9) continue;
+        int index=choice-1;
+        if(board[index]!=' ') continue;
+        return index;
     }
 }
 
 int playTicTacToeRound() {
-    vector<char> board(9, ' ');
-    displayTable(board);
-    while (true) {
-        int move = readMove(board, 'X');
-        board[move] = 'X';
-        displayTable(board);
-        if (checkWinner(board) == 'X') return 1;
-        if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) return 0;
-        vector<int> options;
-        for (int i = 0; i < 9; i++) if (board[i] == ' ') options.push_back(i);
-        int enemyMove = options[rand() % options.size()];
-        board[enemyMove] = 'O';
-        displayTable(board);
-        if (checkWinner(board) == 'O') return -1;
-        if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) return 0;
+    vector<char> board(9,' ');
+    while(true){
+        int idx = readMove(board,'X'); board[idx]='X';
+        if(checkWinner(board)=='X') return 1;
+        if(all_of(board.begin(),board.end(),[](char c){return c!=' ';})) return 0;
+        int enemyMove = readMove(board,'O'); board[enemyMove-1]='O';
+        if(checkWinner(board)=='O') return -1;
+        if(all_of(board.begin(),board.end(),[](char c){return c!=' ';})) return 0;
     }
 }
 
-void enemySpecial(Character& player, Character& enemy) {
-    int choice = rand() % 3;
-    switch(choice) {
-        case 0: player.health = max(0, player.health - 3); break;
-        case 1: enemy.defense += 2; break;
-        case 2: enemy.health += 2; break;
+void enemySpecial(Character& player, Character& enemy){
+    int r=rand()%3;
+    switch(r){
+        case 0: player.health=max(0,player.health-3); break;
+        case 1: enemy.defense+=2; break;
+        case 2: enemy.health+=2; break;
     }
 }
 
-void finalBossSpecial(Character& player, Character& enemy) {
-    int choice = rand() % 3;
-    switch(choice) {
-        case 0: player.health = max(0, player.health - 5); break;
-        case 1: enemy.defense += 4; break;
-        case 2: player.health = max(0, player.health - 3); enemy.health += 3; break;
+void finalBossSpecial(Character& player, Character& enemy){
+    int r=rand()%3;
+    switch(r){
+        case 0: player.health=max(0,player.health-5); break;
+        case 1: enemy.defense+=4; break;
+        case 2: player.health=max(0,player.health-3); enemy.health+=3; break;
     }
 }
 
-bool battle(Character& player, int enemyNum, bool boss=false) {
+bool battle(Character& player,int enemyNum,bool boss=false){
     Character enemy;
-    enemy.name = boss ? "Dark Overlord" : "Enemy " + to_string(enemyNum);
-    enemy.health = boss ? 60 : 20 + enemyNum*5;
-    enemy.attack = boss ? 10 : 5 + enemyNum;
-    enemy.defense = boss ? 6 : 2 + enemyNum;
-    while (player.health > 0 && enemy.health > 0) {
+    enemy.name = boss?"Dark Overlord":"Enemy "+to_string(enemyNum);
+    enemy.health = boss?60:20+enemyNum*5;
+    enemy.attack = boss?10:5+enemyNum;
+    enemy.defense = boss?6:2+enemyNum;
+
+    cout<<"\nBattle vs "<<enemy.name<<"\n";
+
+    while(player.health>0 && enemy.health>0){
         int result = playTicTacToeRound();
-        if (result == 1) {
-            int dmg = max(0, player.attack - enemy.defense);
-            enemy.health -= dmg;
-        } else if (result == -1) {
-            int dmg = max(0, enemy.attack - player.defense);
-            player.health -= dmg;
-        }
-        if (boss) finalBossSpecial(player, enemy);
-        else if (rand()%4==0) enemySpecial(player, enemy);
+        if(result==1){ int dmg=max(0,player.attack-enemy.defense); enemy.health-=dmg; }
+        else if(result==-1){ int dmg=max(0,enemy.attack-player.defense); player.health-=dmg; }
+
+        if(boss) finalBossSpecial(player,enemy);
+        else if(rand()%4==0) enemySpecial(player,enemy);
     }
-    if (player.health <= 0) { cout << "You have fallen.\n"; return false; }
-    else { cout << "X won the battle!\n"; return true; }
+
+    if(player.health<=0){ cout<<"You have fallen.\n"; return false; }
+    else { cout<<"X won the battle!\n"; return true; }
 }
 
-void healingEvent(Character& player) { player.health += 10; }
-void curseEvent(Character& player) { player.defense = max(0, player.defense - 2); }
-void choiceEvent(Character& player) {
-    int choice; cin >> choice;
-    if(choice==1) player.attack+=3;
-    else player.health+=5;
+void healingEvent(Character& player){ cout<<"You find a healing shrine. +10 HP\n"; player.health+=10; }
+void curseEvent(Character& player){ cout<<"A cursed mist weakens you. -2 DEF\n"; player.defense=max(0,player.defense-2);}
+void choiceEvent(Character& player){
+    cout<<"A stranger offers you power.\n1) Gain +3 ATK\n2) Gain +5 HP\nChoice: ";
+    int choice; cin>>choice;
+    if(choice==1){ player.attack+=3; cout<<"Your attack increases!\n"; }
+    else { player.health+=5; cout<<"Your health increases!\n"; }
 }
 void shopEvent(Character& player){
+    cout<<"You find a shop. You have "<<player.gold<<" gold.\n1) +10 HP (5 gold)\n2) +2 ATK (7 gold)\n3) +2 DEF (7 gold)\n0) Leave\n";
     int choice=-1;
     while(choice!=0){
-        cin >> choice;
+        cin>>choice;
         switch(choice){
-            case 1: if(player.gold>=5){player.health+=10;player.gold-=5;} break;
-            case 2: if(player.gold>=7){player.attack+=2;player.gold-=7;} break;
-            case 3: if(player.gold>=7){player.defense+=2;player.gold-=7;} break;
-            case 0: break;
+            case 1: if(player.gold>=5){player.health+=10;player.gold-=5; cout<<"Bought +10 HP\n";} break;
+            case 2: if(player.gold>=7){player.attack+=2;player.gold-=7; cout<<"Bought +2 ATK\n";} break;
+            case 3: if(player.gold>=7){player.defense+=2;player.gold-=7; cout<<"Bought +2 DEF\n";} break;
         }
     }
 }
 
-void playCampaign() {
-    Character player;
-    char again;  // declare once for the whole function
-
-    cout << "Enter your hero's name: "; cin >> player.name;
-    cout << "Choose class (Paladin / Alchemist): "; cin >> player.role;
+void playCampaign(){
+    Character player; char again;
+    cout<<"\nYou awaken in a land shattered by endless war.\nFive trials stand between you.\n\n";
+    cout<<"Enter your hero's name: "; cin>>player.name;
+    cout<<"Choose class (Paladin / Alchemist): "; cin>>player.role;
     if(player.role=="Paladin"){player.health=50;player.attack=8;player.defense=6;}
     else{player.health=45;player.attack=6;player.defense=4;}
 
@@ -181,23 +130,50 @@ void playCampaign() {
     if(!battle(player,4)) goto restart; healingEvent(player);
     if(!battle(player,5,true)) goto restart;
 
-    cout << "You have completed the campaign! Congratulations!\n";
-    cout << "Play again? (y/n): "; cin >> again;
+    cout<<"You have completed the campaign! Congratulations!\n";
+    cout<<"Play again? (y/n): "; cin>>again;
     if(again=='y'||again=='Y') playCampaign();
     return;
 
 restart:
-    cout << "Restart campaign? (y/n): "; cin >> again;
+    cout<<"Restart campaign? (y/n): "; cin>>again;
     if(again=='y'||again=='Y') playCampaign();
 }
 
+void playRegular(){
+    vector<char> board(9,' ');
+    char current='X';
+    cout<<"Regular Tic-Tac-Toe!\n";
+    while(true){
+        int idx=readMove(board,current);
+        board[idx]=current;
+        char winner=checkWinner(board);
+        if(winner!=' '){ cout<<winner<<" won!\n"; break; }
+        if(all_of(board.begin(),board.end(),[](char c){return c!=' ';})){ cout<<"Draw!\n"; break; }
+        current=(current=='X')?'O':'X';
+    }
+}
 
-int main() {
+void playBattle(){
+    vector<char> board(9,' ');
+    char current='X';
+    cout<<"Battle mode!\n";
+    while(true){
+        int idx=readMove(board,current);
+        board[idx]=current;
+        char winner=checkWinner(board);
+        if(winner!=' '){ cout<<winner<<" won the battle!\n"; break; }
+        if(all_of(board.begin(),board.end(),[](char c){return c!=' ';})){ cout<<"Battle draw!\n"; break; }
+        current=(current=='X')?'O':'X';
+    }
+}
+
+int main(){
     srand(time(nullptr));
     cout<<"Welcome to the Tic Tac Toe Game!!\n\n";
     while(true){
         cout<<"Choose game type:\n1) regular\n2) battle\n3) campaign\nEnter 1, 2, or 3: ";
-        int choice; if(!(cin>>choice)){cin.clear();cin.ignore(numeric_limits<streamsize>::max(),'\n');continue;}
+        int choice; if(!(cin>>choice)){cin.clear();cin.ignore(numeric_limits<streamsize>::max(),'\n'); continue;}
         if(choice==1) playRegular();
         else if(choice==2) playBattle();
         else if(choice==3) playCampaign();
@@ -206,3 +182,4 @@ int main() {
     }
     return 0;
 }
+
