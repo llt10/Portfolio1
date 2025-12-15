@@ -167,6 +167,8 @@ void shopEvent(Character& player){
 
 void playCampaign() {
     Character player;
+    char again;  // declare once for the whole function
+
     cout << "Enter your hero's name: "; cin >> player.name;
     cout << "Choose class (Paladin / Alchemist): "; cin >> player.role;
     if(player.role=="Paladin"){player.health=50;player.attack=8;player.defense=6;}
@@ -180,14 +182,15 @@ void playCampaign() {
     if(!battle(player,5,true)) goto restart;
 
     cout << "You have completed the campaign! Congratulations!\n";
-    char again; cout << "Play again? (y/n): "; cin>>again;
+    cout << "Play again? (y/n): "; cin >> again;
     if(again=='y'||again=='Y') playCampaign();
     return;
 
 restart:
-    char again; cout << "Restart campaign? (y/n): "; cin>>again;
+    cout << "Restart campaign? (y/n): "; cin >> again;
     if(again=='y'||again=='Y') playCampaign();
 }
+
 
 int main() {
     srand(time(nullptr));
