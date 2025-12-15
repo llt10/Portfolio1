@@ -1,19 +1,51 @@
 #include "campaign.hpp"
 #include <iostream>
+#include <vector>
 #include <cstdlib>
 #include <ctime>
 #include <algorithm>
 #include <stdexcept>
 
-// ---------------- TIC TAC TOE SIMULATION ----------------
-//  1  = player wins
-// -1  = enemy wins
-//  0  = draw
-int playSingleTicTacToeMatch() {
-    int roll = rand() % 3;
-    if (roll == 0) return 1;
-    if (roll == 1) return -1;
-    return 0;
+// tictactoe
+char checkWinner(const std::vector<char>&);
+bool boardFull(const std::vector<char>&);
+void displayTable(const std::vector<char>&);
+int readMove(const std::vector<char>&, char);
+
+
+int playCampaignTicTacToe() {
+    std::vector<char> board(9, ' ');
+    char playerMark = 'X';
+    char enemyMark = 'O';
+    char current = playerMark;
+
+    displayTable(board);
+
+    while (true) {
+        if (current == playerMark) {
+            int move = readMove(board, playerMark);
+            board[move] = playerMark;
+        } else {
+            // Enemy random move
+            std::vector<int> empty;
+            for (int i = 0; i < 9; ++i)
+                if (board[i] == ' ')
+                    empty.push_back(i);
+
+            int choice = empty[rand() % empty.size()];
+            board[choice] = enemyMark;
+            std::cout << "Enemy chooses position " << (choice + 1) << "\n";
+        }
+
+        displayTable(board);
+
+        char winner = checkWinner(board);
+        if (winner == playerMark) return 1;
+        if (winner == enemyMark) return -1;
+        if (boardFull(board)) return 0;
+
+        current = (current == playerMark) ? enemyMark : playerMark;
+    }
 }
 
 // ---------------- EVENTS ----------------
@@ -32,6 +64,7 @@ void choiceEvent(Character& player) {
     std::cout << "A stranger offers you power.\n";
     std::cout << "1) Gain +3 ATK\n";
     std::cout << "2) Gain +5 HP\n";
+
     int choice;
     std::cin >> choice;
 
@@ -44,7 +77,7 @@ void choiceEvent(Character& player) {
     }
 }
 
-// ---------------- BATTLE ----------------
+
 
 void battle(Character& player, int enemyNumber, bool finalBoss = false) {
     Character enemy;
@@ -57,28 +90,28 @@ void battle(Character& player, int enemyNumber, bool finalBoss = false) {
     std::cout << "\nBattle vs " << enemy.name << "\n";
 
     while (player.health > 0 && enemy.health > 0) {
-        int result = playSingleTicTacToeMatch();
+        int result = playCampaignTicTacToe();
 
         if (result == 1) {
-            int damage = std::max(0, player.attack - enemy.defense);
-            enemy.health -= damage;
-            std::cout << "You won the tic-tac-toe round! Enemy takes "
-                      << damage << " damage.\n";
+            int dmg = std::max(0, player.attack - enemy.defense);
+            enemy.health -= dmg;
+            std::cout << "You won the match! Enemy takes "
+                      << dmg << " damage.\n";
         }
         else if (result == -1) {
-            int damage = std::max(0, enemy.attack - player.defense);
+            int dmg = std::max(0, enemy.attack - player.defense);
 
             if (finalBoss && rand() % 3 == 0) {
-                std::cout << "The Dark Overlord uses Shadow Burst!\n";
-                damage += 5;
+                std::cout << "The Dark Overlord unleashes Shadow Burst!\n";
+                dmg += 5;
             }
 
-            player.health -= damage;
-            std::cout << "Enemy won the round! You take "
-                      << damage << " damage.\n";
+            player.health -= dmg;
+            std::cout << "Enemy won the match! You take "
+                      << dmg << " damage.\n";
         }
         else {
-            std::cout << "The round was a draw. No damage dealt.\n";
+            std::cout << "The match was a draw. No damage dealt.\n";
         }
 
         std::cout << "Player HP: " << player.health
@@ -86,8 +119,8 @@ void battle(Character& player, int enemyNumber, bool finalBoss = false) {
     }
 
     if (player.health <= 0) {
-        std::cout << "You have fallen. Restarting...\n\n";
-        throw std::runtime_error("Player died");
+        std::cout << "You have fallen. Restarting campaign...\n\n";
+        throw std::runtime_error("dead");
     }
 
     std::cout << enemy.name << " defeated!\n";
@@ -133,12 +166,12 @@ void playCampaign() {
         battle(player, 4);
         healingEvent(player);
 
-        battle(player, 5, true); // FINAL BOSS
+        battle(player, 5, true); 
 
         std::cout << "\nYou have conquered the campaign!\n";
         std::cout << "Peace returns to the land. Victory is yours.\n\n";
     }
     catch (...) {
-        playCampaign(); // restart on death
+        playCampaign(); 
     }
 }
