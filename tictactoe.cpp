@@ -99,8 +99,16 @@ bool battle(Character& player,int enemyNum,bool boss=false){
 
     while(player.health>0 && enemy.health>0){
         int result = playTicTacToeRound();
-        if(result==1){ int dmg=max(0,player.attack-enemy.defense); enemy.health-=dmg; cout<<"You won the round! Enemy takes "<<dmg<<" damage.\n"; }
-        else if(result==-1){ int dmg=max(0,enemy.attack-player.defense); player.health-=dmg; cout<<"Enemy won the round! You take "<<dmg<<" damage.\n"; }
+        if(result==1){ 
+            int dmg=max(0,player.attack-enemy.defense); 
+            enemy.health-=dmg; 
+            cout<<"You won the round! Enemy takes "<<dmg<<" damage.\n"; 
+        }
+        else if(result==-1){ 
+            int dmg=max(0,enemy.attack-player.defense); 
+            player.health-=dmg; 
+            cout<<"Enemy won the round! You take "<<dmg<<" damage.\n"; 
+        }
         else cout<<"The round was a draw. No damage dealt.\n";
         cout<<"Player HP: "<<player.health<<" | Enemy HP: "<<enemy.health<<"\n\n";
 
@@ -141,14 +149,31 @@ void playCampaign(){
     if(player.role=="Paladin"){player.health=50;player.attack=8;player.defense=6;}
     else{player.health=45;player.attack=6;player.defense=4;}
 
-    if(!battle(player,1)) goto restart; healingEvent(player);
-    if(!battle(player,2)) goto restart; curseEvent(player);
-    if(!battle(player,3)) goto restart; choiceEvent(player);
+    cout<<"\nYour journey begins...\n";
+
+    cout<<"\nBattle 1: A goblin blocks your path!\n";
+    if(!battle(player,1)) goto restart; 
+    cout<<"You move forward into the dark forest.\n"; healingEvent(player);
+
+    cout<<"\nBattle 2: A bandit ambushes you on the road!\n";
+    if(!battle(player,2)) goto restart;
+    cout<<"The air is thick with a cursed mist.\n"; curseEvent(player);
+
+    cout<<"\nBattle 3: A sly rogue appears!\n";
+    if(!battle(player,3)) goto restart;
+    cout<<"You meet a mysterious figure offering power.\n"; choiceEvent(player);
+
+    cout<<"\nYou find a small village with a shop.\n";
     shopEvent(player);
-    if(!battle(player,4)) goto restart; healingEvent(player);
+
+    cout<<"\nBattle 4: A giant troll blocks the bridge!\n";
+    if(!battle(player,4)) goto restart;
+    cout<<"You continue toward the final showdown.\n"; healingEvent(player);
+
+    cout<<"\nFinal Battle: The Dark Overlord stands before you!\n";
     if(!battle(player,5,true)) goto restart;
 
-    cout<<"You have completed the campaign! Congratulations!\n";
+    cout<<"\nWith the Dark Overlord defeated, peace returns to the land!\n";
     cout<<"Play again? (y/n): "; cin>>again;
     if(again=='y'||again=='Y') playCampaign();
     return;
