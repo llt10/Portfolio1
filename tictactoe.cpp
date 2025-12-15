@@ -17,21 +17,16 @@ struct Character {
     char mark;
 };
 
-/* =========================================================
-   REQUIRED FUNCTIONS (FIXES LINKER ERROR)
-   ========================================================= */
-
+// wouldnt work without this
 std::string promptArchetype(int playerNum) {
     while (true) {
         std::cout << "Player " << playerNum
                   << " choose archetype (Paladin / Alchemist): ";
-        std::string choice;
-        std::cin >> choice;
+        std::string s;
+        std::cin >> s;
 
-        if (choice == "Paladin" || choice == "paladin")
-            return "Paladin";
-        if (choice == "Alchemist" || choice == "alchemist")
-            return "Alchemist";
+        if (s == "Paladin" || s == "paladin") return "Paladin";
+        if (s == "Alchemist" || s == "alchemist") return "Alchemist";
 
         std::cout << "Invalid archetype.\n";
     }
@@ -41,20 +36,14 @@ char promptForMove(int playerNum, char) {
     while (true) {
         std::cout << "Player " << playerNum
                   << " choose single-character mark: ";
-        char m;
-        std::cin >> m;
-
-        if (std::isprint(m) && !std::isspace(m))
-            return m;
-
+        char c;
+        std::cin >> c;
+        if (std::isprint(c) && !std::isspace(c)) return c;
         std::cout << "Invalid mark.\n";
     }
 }
 
-/* =========================================================
-   TIC TAC TOE CORE
-   ========================================================= */
-
+// original
 char showCell(const std::vector<char>& board, int i) {
     return board[i] != ' ' ? board[i] : static_cast<char>('1' + i);
 }
@@ -68,59 +57,65 @@ void displayTable(const std::vector<char>& board) {
 }
 
 char checkWinner(const std::vector<char>& b) {
-    const int wins[8][3] = {
+    const int lines[8][3] = {
         {0,1,2},{3,4,5},{6,7,8},
         {0,3,6},{1,4,7},{2,5,8},
         {0,4,8},{2,4,6}
     };
-
     for (int i = 0; i < 8; i++) {
-        if (b[wins[i][0]] != ' ' &&
-            b[wins[i][0]] == b[wins[i][1]] &&
-            b[wins[i][1]] == b[wins[i][2]])
-            return b[wins[i][0]];
+        if (b[lines[i][0]] != ' ' &&
+            b[lines[i][0]] == b[lines[i][1]] &&
+            b[lines[i][1]] == b[lines[i][2]])
+            return b[lines[i][0]];
     }
     return ' ';
-}
-
-bool boardFull(const std::vector<char>& b) {
-    for (char c : b)
-        if (c == ' ')
-            return false;
-    return true;
 }
 
 int readMove(const std::vector<char>& board, char player) {
     while (true) {
         std::cout << "Player " << player << " enter move (1-9): ";
-        int choice;
-        if (!(std::cin >> choice)) {
+        int c;
+        if (!(std::cin >> c)) {
             std::cin.clear();
             std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
             continue;
         }
-        if (choice < 1 || choice > 9) continue;
-        if (board[choice - 1] != ' ') continue;
-        return choice - 1;
+        if (c < 1 || c > 9 || board[c - 1] != ' ') {
+            std::cout << "Invalid move.\n";
+            continue;
+        }
+        return c - 1;
     }
 }
 
-/* =========================================================
-   SINGLE MATCH (USED BY BATTLE & CAMPAIGN)
-   ========================================================= */
+// story
+void eventBetweenBattles(Character &player) {
+    std::cout << "\nChoose an event:\n";
+    std::cout << "1) Heal +5\n2) Attack +1\n3) Defense +1\nChoice: ";
+    int c;
+    std::cin >> c;
 
-void playSingleMatch(Character& player, Character& enemy) {
+    if (c == 1) player.health += 5;
+    else if (c == 2) player.attack += 1;
+    else if (c == 3) player.defense += 1;
+
+    std::cout << "Stats — HP: " << player.health
+              << " ATK: " << player.attack
+              << " DEF: " << player.defense << "\n";
+}
+
+// battle mode
+bool playBattle(Character &player, Character &enemy, bool finalBoss = false) {
     std::vector<char> board(9, ' ');
     char current = player.mark;
 
-    displayTable(board);
-
-    while (true) {
+    while (player.health > 0 && enemy.health > 0) {
         int idx;
         if (current == player.mark)
             idx = readMove(board, player.mark);
-        else
+        else {
             do { idx = std::rand() % 9; } while (board[idx] != ' ');
+        }
 
         board[idx] = current;
         displayTable(board);
@@ -130,168 +125,93 @@ void playSingleMatch(Character& player, Character& enemy) {
             if (winner == player.mark) {
                 int dmg = std::max(0, player.attack - enemy.defense);
                 enemy.health -= dmg;
-                std::cout << "You win the match! Damage dealt: " << dmg << "\n";
+                std::cout << "You dealt " << dmg << " damage!\n";
             } else {
                 int dmg = std::max(0, enemy.attack - player.defense);
                 player.health -= dmg;
-                std::cout << enemy.name << " wins the match! Damage taken: " << dmg << "\n";
+                std::cout << enemy.name << " dealt " << dmg << " damage!\n";
             }
-            return;
-        }
 
-        if (boardFull(board)) {
-            std::cout << "Draw! No damage dealt.\n";
-            return;
+            if (finalBoss && std::rand() % 2 == 0) {
+                std::cout << "⚡ Zeus uses Thunderbolt! +2 damage ⚡\n";
+                player.health -= 2;
+            }
+
+            board.assign(9, ' ');
         }
 
         current = (current == player.mark) ? enemy.mark : player.mark;
     }
+
+    return player.health > 0;
 }
 
-/* =========================================================
-   EVENTS
-   ========================================================= */
-
-void eventBetweenBattles(Character& player) {
-    std::cout << "\nAn event occurs!\n";
-    std::cout << "1) Rest (+5 health)\n";
-    std::cout << "2) Train (+1 attack)\n";
-    std::cout << "Choose: ";
-
-    int choice;
-    std::cin >> choice;
-
-    if (choice == 1) {
-        player.health += 5;
-        std::cout << "You feel refreshed.\n";
-    } else {
-        player.attack += 1;
-        std::cout << "You feel stronger.\n";
-    }
-}
-
-/* =========================================================
-   CAMPAIGN MODE
-   ========================================================= */
-
+// campaign
 void playCampaign() {
-    std::srand(std::time(nullptr));
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
 
     Character player;
-    std::cout << "Welcome Hero! Enter your name: ";
+    std::cout << "Enter hero name: ";
     std::cin >> player.name;
-
     player.archetype = promptArchetype(1);
-    player.mark = promptForMove(1, ' ');
-
-    if (player.archetype == "Paladin") {
-        player.health = 25;
-        player.attack = 5;
-        player.defense = 3;
-    } else {
-        player.health = 20;
-        player.attack = 6;
-        player.defense = 2;
-    }
+    player.mark = promptForMove(1, '\0');
+    player.health = 20;
+    player.attack = 5;
+    player.defense = 2;
 
     std::vector<Character> gods = {
-        {"Ares","God",12,4,1,'O'},
-        {"Athena","God",14,5,2,'O'},
-        {"Poseidon","God",16,6,3,'O'},
-        {"Hades","God",18,7,3,'O'},
-        {"Zeus","God",25,8,4,'O'}
+        {"Ares","God",10,4,1,'A'},
+        {"Athena","God",12,5,2,'B'},
+        {"Poseidon","God",14,6,3,'C'},
+        {"Hades","God",16,7,3,'D'},
+        {"Zeus","God",20,8,4,'Z'}
     };
 
-    std::cout << "\nYour journey to Mount Olympus begins...\n";
-
     for (size_t i = 0; i < gods.size(); i++) {
-        Character& enemy = gods[i];
-        std::cout << "\nYou face " << enemy.name << "!\n";
+        std::cout << "\n⚔ Battle against " << gods[i].name << " ⚔\n";
+        bool won = playBattle(player, gods[i], i == gods.size() - 1);
 
-        while (player.health > 0 && enemy.health > 0) {
-            playSingleMatch(player, enemy);
-
-            if (enemy.name == "Zeus" && std::rand() % 2 == 0) {
-                std::cout << "⚡ Zeus uses Lightning Strike!\n";
-                player.health -= 2;
-            }
-
-            std::cout << "Your HP: " << player.health
-                      << " | " << enemy.name << " HP: " << enemy.health << "\n";
-        }
-
-        if (player.health <= 0) {
-            std::cout << "\nYou were defeated. Campaign restarting...\n";
+        if (!won) {
+            std::cout << "\n You were defeated. Campaign over.\n";
             return;
         }
 
-        std::cout << "You defeated " << enemy.name << "!\n";
-        if (i < gods.size() - 1)
-            eventBetweenBattles(player);
+        std::cout << gods[i].name << " defeated!\n";
+        if (i < gods.size() - 1) eventBetweenBattles(player);
     }
 
-    std::cout << "\n🏆 You defeated Zeus and completed the campaign! 🏆\n";
+    std::cout << "\nYOU DEFEATED ZEUS AND WON THE CAMPAIGN \n";
 }
 
-/* =========================================================
-   OTHER MODES
-   ========================================================= */
-
+// regular
 void playRegular() {
     std::vector<char> board(9, ' ');
-    char current = 'X';
-    displayTable(board);
-
+    char cur = 'X';
     while (true) {
-        int idx = readMove(board, current);
-        board[idx] = current;
+        int idx = readMove(board, cur);
+        board[idx] = cur;
         displayTable(board);
-
-        char winner = checkWinner(board);
-        if (winner != ' ') {
-            std::cout << winner << " wins!\n";
-            return;
-        }
-        if (boardFull(board)) {
-            std::cout << "Draw!\n";
-            return;
-        }
-        current = (current == 'X') ? 'O' : 'X';
+        char w = checkWinner(board);
+        if (w != ' ') { std::cout << w << " wins!\n"; break; }
+        cur = (cur == 'X') ? 'O' : 'X';
     }
 }
 
-void playBattleMode() {
-    Character player = {"Player","Paladin",15,5,2,'X'};
-    Character enemy = {"Enemy","God",15,4,1,'O'};
-
-    while (player.health > 0 && enemy.health > 0)
-        playSingleMatch(player, enemy);
-}
-
-/* =========================================================
-   MAIN
-   ========================================================= */
-
+// main
 int main() {
     while (true) {
-        std::cout << "\nChoose game type:\n"
-                  << "1) Regular\n"
-                  << "2) Battle\n"
-                  << "3) Campaign\n"
-                  << "Enter choice: ";
+        std::cout << "\n1) Regular\n2) Campaign\nChoice: ";
+        int c;
+        std::cin >> c;
 
-        int choice;
-        std::cin >> choice;
-
-        if (choice == 1) playRegular();
-        else if (choice == 2) playBattleMode();
-        else if (choice == 3) playCampaign();
+        if (c == 1) playRegular();
+        else if (c == 2) playCampaign();
         else continue;
 
-        std::cout << "Play again? (y/n): ";
-        char again;
-        std::cin >> again;
-        if (again != 'y' && again != 'Y') break;
+        std::cout << "\nPlay again? (y/n): ";
+        char a;
+        std::cin >> a;
+        if (a != 'y' && a != 'Y') break;
     }
 
     std::cout << "Thanks for playing!\n";
