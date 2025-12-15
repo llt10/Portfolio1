@@ -17,6 +17,14 @@ struct Character {
     int gold = 0;
 };
 
+void displayBoard(const vector<char>& board){
+    cout << " " << board[0] << " | " << board[1] << " | " << board[2] << "\n";
+    cout << "---+---+---\n";
+    cout << " " << board[3] << " | " << board[4] << " | " << board[5] << "\n";
+    cout << "---+---+---\n";
+    cout << " " << board[6] << " | " << board[7] << " | " << board[8] << "\n\n";
+}
+
 char checkWinner(const vector<char>& b) {
     const int lines[8][3] = {{0,1,2},{3,4,5},{6,7,8},{0,3,6},{1,4,7},{2,5,8},{0,4,8},{2,4,6}};
     for(int i=0;i<8;i++){
@@ -44,10 +52,16 @@ int readMove(const vector<char>& board, char player){
 int playTicTacToeRound() {
     vector<char> board(9,' ');
     while(true){
-        int idx = readMove(board,'X'); board[idx]='X';
+        displayBoard(board);
+        int idx = readMove(board,'X'); 
+        board[idx]='X';
+        displayBoard(board);
         if(checkWinner(board)=='X') return 1;
         if(all_of(board.begin(),board.end(),[](char c){return c!=' ';})) return 0;
-        int enemyMove = readMove(board,'O'); board[enemyMove-1]='O';
+        
+        int enemyMove = readMove(board,'O'); 
+        board[enemyMove-1]='O';
+        displayBoard(board);
         if(checkWinner(board)=='O') return -1;
         if(all_of(board.begin(),board.end(),[](char c){return c!=' ';})) return 0;
     }
@@ -82,15 +96,17 @@ bool battle(Character& player,int enemyNum,bool boss=false){
 
     while(player.health>0 && enemy.health>0){
         int result = playTicTacToeRound();
-        if(result==1){ int dmg=max(0,player.attack-enemy.defense); enemy.health-=dmg; }
-        else if(result==-1){ int dmg=max(0,enemy.attack-player.defense); player.health-=dmg; }
+        if(result==1){ int dmg=max(0,player.attack-enemy.defense); enemy.health-=dmg; cout<<"You won the round! Enemy takes "<<dmg<<" damage.\n"; }
+        else if(result==-1){ int dmg=max(0,enemy.attack-player.defense); player.health-=dmg; cout<<"Enemy won the round! You take "<<dmg<<" damage.\n"; }
+        else cout<<"The round was a draw. No damage dealt.\n";
+        cout<<"Player HP: "<<player.health<<" | Enemy HP: "<<enemy.health<<"\n\n";
 
         if(boss) finalBossSpecial(player,enemy);
         else if(rand()%4==0) enemySpecial(player,enemy);
     }
 
     if(player.health<=0){ cout<<"You have fallen.\n"; return false; }
-    else { cout<<"X won the battle!\n"; return true; }
+    else { cout<<player.name<<" won the battle!\n"; return true; }
 }
 
 void healingEvent(Character& player){ cout<<"You find a healing shrine. +10 HP\n"; player.health+=10; }
@@ -144,8 +160,10 @@ void playRegular(){
     char current='X';
     cout<<"Regular Tic-Tac-Toe!\n";
     while(true){
+        displayBoard(board);
         int idx=readMove(board,current);
         board[idx]=current;
+        displayBoard(board);
         char winner=checkWinner(board);
         if(winner!=' '){ cout<<winner<<" won!\n"; break; }
         if(all_of(board.begin(),board.end(),[](char c){return c!=' ';})){ cout<<"Draw!\n"; break; }
@@ -158,8 +176,10 @@ void playBattle(){
     char current='X';
     cout<<"Battle mode!\n";
     while(true){
+        displayBoard(board);
         int idx=readMove(board,current);
         board[idx]=current;
+        displayBoard(board);
         char winner=checkWinner(board);
         if(winner!=' '){ cout<<winner<<" won the battle!\n"; break; }
         if(all_of(board.begin(),board.end(),[](char c){return c!=' ';})){ cout<<"Battle draw!\n"; break; }
