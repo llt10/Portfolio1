@@ -5,6 +5,7 @@
 #include <ctime>
 #include <algorithm>
 #include <stdexcept>
+#include "battle.hpp"
 
 // tictactoe
 char checkWinner(const std::vector<char>&);
