@@ -90,16 +90,18 @@ int playTicTacToeRound() {
     vector<char> board(9, ' ');
     displayTable(board);
     while (true) {
+        cout << "Your turn:\n";
         int move = readMove(board, 'X');
         board[move] = 'X';
         displayTable(board);
         if (checkWinner(board) == 'X') return 1;
         if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) return 0;
+        cout << "Enemy's turn:\n";
         vector<int> options;
         for (int i = 0; i < 9; i++) if (board[i] == ' ') options.push_back(i);
         int enemyMove = options[rand() % options.size()];
         board[enemyMove] = 'O';
-        cout << "Enemy chooses position " << enemyMove + 1 << endl;
+        cout << "Enemy chooses position " << enemyMove + 1 << "\n";
         displayTable(board);
         if (checkWinner(board) == 'O') return -1;
         if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) return 0;
