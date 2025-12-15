@@ -22,11 +22,7 @@ void displayTable(const vector<char>& board) {
 }
 
 char checkWinner(const vector<char>& b) {
-    const int lines[8][3] = {
-        {0,1,2},{3,4,5},{6,7,8},
-        {0,3,6},{1,4,7},{2,5,8},
-        {0,4,8},{2,4,6}
-    };
+    const int lines[8][3] = {{0,1,2},{3,4,5},{6,7,8},{0,3,6},{1,4,7},{2,5,8},{0,4,8},{2,4,6}};
     for (int i = 0; i < 8; ++i) {
         int a = lines[i][0], c = lines[i][1], d = lines[i][2];
         if (b[a] != ' ' && b[a] == b[c] && b[c] == b[d])
@@ -39,21 +35,10 @@ int readMove(const vector<char>& board, char player) {
     while (true) {
         cout << "Player " << player << " — enter a move (1-9): ";
         int choice;
-        if (!(cin >> choice)) {
-            cin.clear();
-            cin.ignore(numeric_limits<streamsize>::max(), '\n');
-            cout << "Error: Please enter a number from 1 to 9.\n";
-            continue;
-        }
-        if (choice < 1 || choice > 9) {
-            cout << "Out of bounds. Choose 1-9.\n";
-            continue;
-        }
+        if (!(cin >> choice)) { cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n'); continue; }
+        if (choice < 1 || choice > 9) { cout << "Out of bounds. Choose 1-9.\n"; continue; }
         int index = choice - 1;
-        if (board[index] != ' ') {
-            cout << "Cell taken. Choose another.\n";
-            continue;
-        }
+        if (board[index] != ' ') { cout << "Cell taken. Choose another.\n"; continue; }
         return index;
     }
 }
@@ -77,14 +62,8 @@ void playRegular() {
         board[idx] = current;
         displayTable(board);
         char winner = checkWinner(board);
-        if (winner != ' ') {
-            cout << winner << " won the game!\n" << endl;
-            break;
-        }
-        if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) {
-            cout << "It's a draw!\n" << endl;
-            break;
-        }
+        if (winner != ' ') { cout << winner << " won the game!\n\n"; break; }
+        if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) { cout << "It's a draw!\n\n"; break; }
         current = (current == 'X') ? 'O' : 'X';
     }
 }
@@ -101,14 +80,8 @@ void playBattle() {
         board[idx] = current;
         displayTable(board);
         char winner = checkWinner(board);
-        if (winner != ' ') {
-            cout << winner << " won the battle!\n" << endl;
-            break;
-        }
-        if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) {
-            cout << "Battle draw!\n" << endl;
-            break;
-        }
+        if (winner != ' ') { cout << winner << " won the battle!\n\n"; break; }
+        if (all_of(board.begin(), board.end(), [](char c){ return c != ' '; })) { cout << "Battle draw!\n\n"; break; }
         current = (current == p1Move) ? p2Move : p1Move;
     }
 }
@@ -177,7 +150,21 @@ void battle(Character& player, int enemyNum, bool boss=false) {
 void healingEvent(Character& player) { cout << "You find a healing shrine. +10 HP\n"; player.health += 10; }
 void curseEvent(Character& player) { cout << "A cursed mist weakens you. -2 DEF\n"; player.defense = max(0, player.defense - 2); }
 void choiceEvent(Character& player) { cout << "A stranger offers you power.\n1) Gain +3 ATK\n2) Gain +5 HP\n"; int choice; cin >> choice; if(choice==1){player.attack+=3;cout<<"Your attack increases!\n";} else{player.health+=5;cout<<"You feel healthier!\n";} }
-void shopEvent(Character& player){ cout<<"\nYou enter a merchant's shop. You have "<<player.gold<<" gold.\n"; cout<<"1) Health Potion +10 HP (5 gold)\n2) Steel Sword +2 ATK (7 gold)\n3) Armor +2 DEF (7 gold)\n0) Leave shop\n"; int choice; cin>>choice; switch(choice){case 1: if(player.gold>=5){player.health+=10;player.gold-=5;cout<<"Health increased!\n";} break; case 2: if(player.gold>=7){player.attack+=2;player.gold-=7;cout<<"Attack increased!\n";} break; case 3: if(player.gold>=7){player.defense+=2;player.gold-=7;cout<<"Defense increased!\n";} break; default: cout<<"Leaving shop.\n"; break;} }
+void shopEvent(Character& player){
+    int choice=-1;
+    while(choice!=0){
+        cout << "\nYou enter a merchant's shop. You have " << player.gold << " gold.\n";
+        cout << "1) Health Potion +10 HP (5 gold)\n2) Steel Sword +2 ATK (7 gold)\n3) Armor +2 DEF (7 gold)\n0) Leave shop\nEnter your choice: ";
+        cin >> choice;
+        switch(choice){
+            case 1: if(player.gold>=5){player.health+=10;player.gold-=5;cout<<"Health increased!\n";} else cout<<"Not enough gold.\n"; break;
+            case 2: if(player.gold>=7){player.attack+=2;player.gold-=7;cout<<"Attack increased!\n";} else cout<<"Not enough gold.\n"; break;
+            case 3: if(player.gold>=7){player.defense+=2;player.gold-=7;cout<<"Defense increased!\n";} else cout<<"Not enough gold.\n"; break;
+            case 0: cout<<"Leaving shop.\n"; break;
+            default: cout<<"Invalid choice.\n"; break;
+        }
+    }
+}
 
 void playCampaign() {
     try {
