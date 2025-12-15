@@ -8,7 +8,7 @@
 
 using namespace std;
 
-/* ================= TIC TAC TOE FUNCTIONS ================= */
+//original
 
 char showCell(const vector<char>& board, int i) {
     return (board[i] != ' ') ? board[i] : static_cast<char>('1' + i);
@@ -60,7 +60,7 @@ int readMove(const vector<char>& board, char player) {
     }
 }
 
-/* ================= CHARACTER STRUCT ================= */
+
 
 struct Character {
     string name;
@@ -70,7 +70,7 @@ struct Character {
     int defense;
 };
 
-/* ================= TIC-TAC-TOE ROUND ================= */
+
 
 int playTicTacToeRound() {
     vector<char> board(9, ' ');
@@ -102,7 +102,7 @@ int playTicTacToeRound() {
     }
 }
 
-/* ================= EVENTS ================= */
+
 
 void healingEvent(Character& player) {
     cout << "You find a healing shrine. +10 HP\n";
@@ -127,7 +127,7 @@ void choiceEvent(Character& player) {
     }
 }
 
-/* ================= BATTLE ================= */
+
 
 void battle(Character& player, int enemyNum, bool boss = false) {
     Character enemy;
@@ -164,7 +164,7 @@ void battle(Character& player, int enemyNum, bool boss = false) {
     cout << enemy.name << " defeated!\n";
 }
 
-/* ================= CAMPAIGN ================= */
+//campaign
 
 void playCampaign() {
     try {
@@ -222,11 +222,31 @@ int main() {
     srand(time(nullptr));
 
     cout << "Welcome to the Tic Tac Toe Game!!\n\n";
-    cout << "Choose game type:\n1) regular\n2) battle\n3) campaign\nEnter 1, 2, or 3: ";
-    int choice; cin >> choice;
 
-    if (choice == 3) playCampaign();
-    else cout << "Only campaign mode implemented\n";
+    while (true) {
+        cout << "Choose game type:\n1) regular\n2) battle\n3) campaign\nEnter 1, 2, or 3: ";
+        int choice; 
+        if (!(cin >> choice)) {
+            cin.clear(); cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            continue;
+        }
+
+        if (choice == 1) {
+            playRegular(); 
+        } else if (choice == 2) {
+            playBattle();    
+        } else if (choice == 3) {
+            playCampaign();  // new campaign mode
+        } else {
+            cout << "Invalid choice.\n";
+            continue;
+        }
+
+        char again;
+        cout << "Play again? (y/n): ";
+        cin >> again;
+        if (!(again=='y' || again=='Y')) break;
+    }
 
     return 0;
 }
