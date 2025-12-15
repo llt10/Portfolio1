@@ -1,5 +1,4 @@
 #include <iostream>
-#include "battle.hpp"
 #include <vector>
 #include <cstdlib>
 #include <ctime>
@@ -182,4 +181,3 @@ int main(){
     }
     return 0;
 }
-
