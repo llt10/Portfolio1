@@ -182,6 +182,29 @@ void playCampaign() {
 
     std::cout << "\nYOU DEFEATED ZEUS AND WON THE CAMPAIGN \n";
 }
+void playBattleMode() {
+    std::srand(static_cast<unsigned>(std::time(nullptr)));
+
+    Character player;
+    player.name = "Player";
+    player.archetype = "Paladin";
+    player.mark = promptForMove(1, '\0');
+    player.health = 15;
+    player.attack = 5;
+    player.defense = 2;
+
+    Character enemy;
+    enemy.name = "Trainy";
+    enemy.archetype = "God";
+    enemy.mark = 'O';
+    enemy.health = 15;
+    enemy.attack = 4;
+    enemy.defense = 1;
+
+    std::cout << "\n Battle Mode \n";
+    playBattle(player, enemy, false);
+}
+
 
 // regular
 void playRegular() {
